@@ -1,0 +1,153 @@
+// lib/core/models/models.dart
+
+import 'package:flutter/painting.dart'; // For Color
+
+// 1.1. Participants Model
+class Participant {
+  final int participantId;
+  final String firstName;
+  final String? lastName;
+  final String? nickname;
+  final String role;
+  final String email;
+  // PasswordHash is usually not exposed in the app model
+
+  Participant({
+    required this.participantId,
+    required this.firstName,
+    this.lastName,
+    this.nickname,
+    required this.role,
+    required this.email,
+  });
+}
+
+// 1.2. Categories Model
+class Category {
+  final int categoryId;
+  final String categoryName;
+  final String colorHex;
+
+  Color get color => Color(int.parse(colorHex.substring(1), radix: 16) + 0xFF000000);
+
+  Category({
+    required this.categoryId,
+    required this.categoryName,
+    required this.colorHex,
+  });
+}
+
+// 1.7. Templates Model
+class Template {
+  final int templateId;
+  final int? syncId;
+  final String? spreadSheetId;
+  final String templateName;
+  final int creatorParticipantId;
+  final DateTime dateCreated;
+  final int timesUsed;
+
+  Template({
+    required this.templateId,
+    this.syncId,
+    this.spreadSheetId,
+    required this.templateName,
+    required this.creatorParticipantId,
+    required this.dateCreated,
+    required this.timesUsed,
+  });
+}
+
+// 1.3. Accounts Model
+class Account {
+  final int accountId;
+  final int categoryId;
+  final int templateId;
+  final String colorHex;
+  final double budgetAmount;
+  final double expenditureTotal;
+  final int responsibleParticipantId;
+  final DateTime dateCreated;
+
+  // Calculated Field from NOTE:
+  double get balance => budgetAmount - expenditureTotal;
+
+  Color get color => Color(int.parse(colorHex.substring(1), radix: 16) + 0xFF000000);
+
+
+  Account({
+    required this.accountId,
+    required this.categoryId,
+    required this.templateId,
+    required this.colorHex,
+    required this.budgetAmount,
+    required this.expenditureTotal,
+    required this.responsibleParticipantId,
+    required this.dateCreated,
+  });
+}
+
+// 1.5. Vendors Model
+class Vendor {
+  final int vendorId;
+  final String vendorName;
+
+  Vendor({
+    required this.vendorId,
+    required this.vendorName,
+  });
+}
+
+// 1.9 SyncLog Model
+class SyncLogEntry {
+  final int syncId;
+  final int? transactionId;
+  final String syncDirection;
+  final bool synced;
+  final bool success;
+  final String? errorMessage;
+  final String sheetUrl;
+  final int associatedTemplate;
+
+  SyncLogEntry({
+    required this.syncId,
+    this.transactionId,
+    required this.syncDirection,
+    required this.synced,
+    required this.success,
+    this.errorMessage,
+    required this.sheetUrl,
+    required this.associatedTemplate,
+  });
+}
+
+
+// 1.4. Transactions Model
+class Transaction {
+  final int transactionId;
+  final int syncId;
+  final int accountId;
+  final bool isIgnored;
+  final DateTime date;
+  final int vendorId;
+  final double amount;
+  final int participantId;
+  final int editorParticipantId;
+  final String? reason;
+
+  Transaction({
+    required this.transactionId,
+    required this.syncId,
+    required this.accountId,
+    required this.isIgnored,
+    required this.date,
+    required this.vendorId,
+    required this.amount,
+    required this.participantId,
+    required this.editorParticipantId,
+    this.reason,
+  });
+}
+
+// (Other models like TransactionEditHistory, VendorPreference,
+// ParticipantIncome, TemplateParticipant, ChartSnapshot would follow a similar structure)

@@ -43,7 +43,7 @@ dependencies:
   path_provider: ^2.1.1
   path: ^1.8.3
 
-  # Google Services
+  # Google services
   google_sign_in: ^6.1.5
   googleapis: ^13.0.0
   googleapis_auth: ^1.4.1
@@ -75,6 +75,8 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^2.0.0
+
+  build_runner: ^2.4.6
 
 
 
