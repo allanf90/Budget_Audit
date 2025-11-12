@@ -16,6 +16,7 @@ class ParticipantService {
   Future<int> addParticipant(
       clientModels.Participant participant, String pwd) async {
     try {
+      final mailLower = participant.email.toLowerCase();
       final pwdHash = PasswordUtils.hashPassword(pwd);
       final participantId = await _database.into(_database.participants).insert(
         db.ParticipantsCompanion.insert(
@@ -23,7 +24,7 @@ class ParticipantService {
           lastName: drift.Value(participant.lastName),
           nickName: drift.Value(participant.nickname),
           role: participant.role.value,
-          email: participant.email,
+          email: mailLower,
           pwdhash: pwdHash,
         ),
       );
@@ -109,6 +110,7 @@ class ParticipantService {
   /// Update a participant’s details
   Future<bool> updateParticipant(models.Participant participant, {String? newPassword}) async {
     try {
+      final emailLower = participant.email.toLowerCase();
       final hashedPassword = newPassword != null
           ? PasswordUtils.hashPassword(newPassword)
           : null;
@@ -121,7 +123,7 @@ class ParticipantService {
           lastName: drift.Value(participant.lastName),
           nickName: drift.Value(participant.nickname),
           role: drift.Value(participant.role.value),
-          email: drift.Value(participant.email),
+          email: drift.Value(emailLower),
           pwdhash: hashedPassword != null ? drift.Value(hashedPassword) : const drift.Value.absent(),
         ),
       );
@@ -143,6 +145,7 @@ class ParticipantService {
   /// Delete a participant
   Future<bool> deleteParticipant(models.Participant participant) async {
     try {
+      _logger.info("Deleting the participant $participant");
       final deletedCount = await (_database.delete(_database.participants)
         ..where((tbl) => tbl.participantId.equals(participant.participantId)))
           .go();

@@ -266,7 +266,7 @@ class ParticipantList extends StatelessWidget {
           ElevatedButton(
             onPressed: () async {
               Navigator.pop(context);
-              await viewModel.deleteParticipant(participant.participantId);
+              await viewModel.removeParticipant(participant.participantId);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.error,

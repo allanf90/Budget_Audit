@@ -1,9 +1,9 @@
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'onboarding_viewmodel.dart';
 import 'widgets/participant_form.dart';
 import 'widgets/participant_list.dart';
+import 'widgets/participant_grid.dart';
 import 'widgets/sign_in_form.dart';
 import '../../core/theme/app_theme.dart';
 
@@ -47,7 +47,7 @@ class _OnboardingViewState extends State<OnboardingView> {
         children: [
           // Logo
           Image.asset(
-            'assets/images/budget_audit_logo.png',
+            'assets/images/logo.png',
             height: 100,
             errorBuilder: (context, error, stackTrace) {
               return Container(
@@ -98,20 +98,72 @@ class _OnboardingViewState extends State<OnboardingView> {
   Widget _buildContent() {
     return Consumer<OnboardingViewModel>(
       builder: (context, viewModel, _) {
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Left side - Form
-            Expanded(
-              flex: 3,
-              child: _buildLeftPanel(viewModel),
-            ),
-            // Right side - Participants list
-            Expanded(
-              flex: 2,
-              child: ParticipantList(viewModel: viewModel),
-            ),
-          ],
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            // Use column layout for screens smaller than 900px width
+            final useColumnLayout = constraints.maxWidth < 900;
+
+            if (useColumnLayout) {
+              return SingleChildScrollView(
+                child: Center(
+                  child: Container(
+                    constraints: BoxConstraints(maxWidth: 600),
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      children: [
+                        _buildModeTabs(viewModel),
+                        const SizedBox(height: 24),
+                        // Participants Grid first
+                        if (viewModel.participants.isNotEmpty ||
+                            viewModel.mode == OnboardingMode.addParticipants)
+                          ParticipantGrid(viewModel: viewModel),
+                        const SizedBox(height: 24),
+                        // Form below
+                        viewModel.mode == OnboardingMode.addParticipants
+                            ? ParticipantForm(viewModel: viewModel)
+                            : SignInForm(viewModel: viewModel),
+                        const SizedBox(height: 24),
+                        // Continue Button
+                        if (viewModel.canProceed()) _buildContinueButton(viewModel),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            } else {
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Left side - Form
+                  Expanded(
+                    flex: 3,
+                    child: _buildLeftPanel(viewModel),
+                  ),
+                  // Right side - Participants Grid
+                  Expanded(
+                    flex: 2,
+                    child: Container(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+
+                          const SizedBox(height: 16),
+                          Expanded(
+                            child: SingleChildScrollView(
+                              child: ParticipantGrid(viewModel: viewModel),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          if (viewModel.canProceed()) _buildContinueButton(viewModel),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            }
+          },
         );
       },
     );
@@ -191,6 +243,37 @@ class _OnboardingViewState extends State<OnboardingView> {
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
           ),
           textAlign: TextAlign.center,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContinueButton(OnboardingViewModel viewModel) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: () {
+          Navigator.pushReplacementNamed(
+            context,
+            viewModel.getNextRoute(),
+          );
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppTheme.primaryBlue,
+          foregroundColor: AppTheme.textPrimary,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+          ),
+          elevation: 0,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('Continue to Budgeting', style: AppTheme.button),
+            const SizedBox(width: 8),
+            const Icon(Icons.arrow_forward, size: 20),
+          ],
         ),
       ),
     );

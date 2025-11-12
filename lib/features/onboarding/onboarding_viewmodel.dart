@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../../core/services/participant_service.dart';
 import '../../core/models/models.dart' as models;
 import '../../core/models/client_models.dart' as client_models;
+import '../../core/services/service_locator.dart';
 import 'package:logging/logging.dart';
 
 
@@ -239,7 +240,8 @@ class OnboardingViewModel extends ChangeNotifier {
 
   // ========== Delete Participant ==========
 
-  Future<bool> deleteParticipant(int participantId) async {
+  Future<bool> removeParticipant(int participantId) async {
+    _setLoading(true);
     // Prevent deleting the manager/owner
     final participant = _participants.firstWhere(
           (p) => p.participantId == participantId,
@@ -252,10 +254,17 @@ class OnboardingViewModel extends ChangeNotifier {
 
     _setLoading(true);
     try {
-      // TODO: Implement delete in participant service
-      // For now, return false as it's not implemented
-      _setError('Delete functionality not yet implemented');
-      return false;
+      _participantService.deleteParticipant(participant);
+      _participants.removeWhere((p) => p.participantId == participantId);
+
+      // If we were editing this participant, clear the edit state
+      if (_editingParticipantId == participantId) {
+        _clearForm();
+      }
+      await loadParticipants();
+      _clearError();
+      notifyListeners();
+      return true;
     } catch (e) {
       _setError('Error deleting participant: $e');
       return false;
