@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'onboarding_viewmodel.dart';
+import '../../core/widgets/app_header.dart';
 import 'widgets/participant_form.dart';
 import 'widgets/participant_list.dart';
 import 'widgets/participant_grid.dart';
@@ -30,7 +31,7 @@ class _OnboardingViewState extends State<OnboardingView> {
       body: SafeArea(
         child: Column(
           children: [
-            _buildHeader(),
+            const AppHeader(),
             Expanded(
               child: _buildContent(),
             ),
@@ -267,12 +268,12 @@ class _OnboardingViewState extends State<OnboardingView> {
           ),
           elevation: 0,
         ),
-        child: Row(
+        child: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Continue to Budgeting', style: AppTheme.button),
-            const SizedBox(width: 8),
-            const Icon(Icons.arrow_forward, size: 20),
+            Text('Continue to Budgeting (Dev env only)', style: AppTheme.button),
+            SizedBox(width: 8),
+            Icon(Icons.arrow_forward, size: 20),
           ],
         ),
       ),

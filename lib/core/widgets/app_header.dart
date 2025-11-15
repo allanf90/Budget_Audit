@@ -11,8 +11,8 @@ class AppHeader extends StatelessWidget {
   const AppHeader({
     Key? key,
     this.subtitle,
-    this.logoHeight = 100,
-    this.padding = const EdgeInsets.symmetric(vertical: 24, horizontal: 32),
+    this.logoHeight = 200,
+    this.padding = const EdgeInsets.symmetric(vertical: 24, horizontal: 24),
   }) : super(key: key);
 
   @override
@@ -47,11 +47,7 @@ class AppHeader extends StatelessWidget {
             },
           ),
           const SizedBox(height: 16),
-          // Title
-          Text(
-            'Budget Audit',
-            style: AppTheme.h1.copyWith(color: AppTheme.primaryPink),
-          ),
+
           if (subtitle != null) ...[
             const SizedBox(height: 8),
             Text(
