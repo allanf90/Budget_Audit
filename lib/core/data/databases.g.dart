@@ -1508,6 +1508,15 @@ class $AccountsTable extends Accounts
       requiredDuringInsert: true,
       defaultConstraints: GeneratedColumn.constraintIsAlways(
           'REFERENCES templates (template_id)'));
+  static const drift.VerificationMeta _accountNameMeta =
+      const drift.VerificationMeta('accountName');
+  @override
+  late final drift.GeneratedColumn<String> accountName =
+      drift.GeneratedColumn<String>('account_name', aliasedName, false,
+          additionalChecks: GeneratedColumn.checkTextLength(
+              minTextLength: 1, maxTextLength: 100),
+          type: DriftSqlType.string,
+          requiredDuringInsert: true);
   static const drift.VerificationMeta _colorHexMeta =
       const drift.VerificationMeta('colorHex');
   @override
@@ -1553,6 +1562,7 @@ class $AccountsTable extends Accounts
         accountId,
         categoryId,
         templateId,
+        accountName,
         colorHex,
         budgetAmount,
         expenditureTotal,
@@ -1589,6 +1599,14 @@ class $AccountsTable extends Accounts
               data['template_id']!, _templateIdMeta));
     } else if (isInserting) {
       context.missing(_templateIdMeta);
+    }
+    if (data.containsKey('account_name')) {
+      context.handle(
+          _accountNameMeta,
+          accountName.isAcceptableOrUnknown(
+              data['account_name']!, _accountNameMeta));
+    } else if (isInserting) {
+      context.missing(_accountNameMeta);
     }
     if (data.containsKey('color_hex')) {
       context.handle(_colorHexMeta,
@@ -1642,6 +1660,8 @@ class $AccountsTable extends Accounts
           .read(DriftSqlType.int, data['${effectivePrefix}category_id'])!,
       templateId: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}template_id'])!,
+      accountName: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}account_name'])!,
       colorHex: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}color_hex'])!,
       budgetAmount: attachedDatabase.typeMapping
@@ -1666,6 +1686,7 @@ class Account extends drift.DataClass implements drift.Insertable<Account> {
   final int accountId;
   final int categoryId;
   final int templateId;
+  final String accountName;
   final String colorHex;
   final double budgetAmount;
   final double? expenditureTotal;
@@ -1675,6 +1696,7 @@ class Account extends drift.DataClass implements drift.Insertable<Account> {
       {required this.accountId,
       required this.categoryId,
       required this.templateId,
+      required this.accountName,
       required this.colorHex,
       required this.budgetAmount,
       this.expenditureTotal,
@@ -1686,6 +1708,7 @@ class Account extends drift.DataClass implements drift.Insertable<Account> {
     map['account_id'] = drift.Variable<int>(accountId);
     map['category_id'] = drift.Variable<int>(categoryId);
     map['template_id'] = drift.Variable<int>(templateId);
+    map['account_name'] = drift.Variable<String>(accountName);
     map['color_hex'] = drift.Variable<String>(colorHex);
     map['budget_amount'] = drift.Variable<double>(budgetAmount);
     if (!nullToAbsent || expenditureTotal != null) {
@@ -1702,6 +1725,7 @@ class Account extends drift.DataClass implements drift.Insertable<Account> {
       accountId: drift.Value(accountId),
       categoryId: drift.Value(categoryId),
       templateId: drift.Value(templateId),
+      accountName: drift.Value(accountName),
       colorHex: drift.Value(colorHex),
       budgetAmount: drift.Value(budgetAmount),
       expenditureTotal: expenditureTotal == null && nullToAbsent
@@ -1719,6 +1743,7 @@ class Account extends drift.DataClass implements drift.Insertable<Account> {
       accountId: serializer.fromJson<int>(json['accountId']),
       categoryId: serializer.fromJson<int>(json['categoryId']),
       templateId: serializer.fromJson<int>(json['templateId']),
+      accountName: serializer.fromJson<String>(json['accountName']),
       colorHex: serializer.fromJson<String>(json['colorHex']),
       budgetAmount: serializer.fromJson<double>(json['budgetAmount']),
       expenditureTotal: serializer.fromJson<double?>(json['expenditureTotal']),
@@ -1734,6 +1759,7 @@ class Account extends drift.DataClass implements drift.Insertable<Account> {
       'accountId': serializer.toJson<int>(accountId),
       'categoryId': serializer.toJson<int>(categoryId),
       'templateId': serializer.toJson<int>(templateId),
+      'accountName': serializer.toJson<String>(accountName),
       'colorHex': serializer.toJson<String>(colorHex),
       'budgetAmount': serializer.toJson<double>(budgetAmount),
       'expenditureTotal': serializer.toJson<double?>(expenditureTotal),
@@ -1747,6 +1773,7 @@ class Account extends drift.DataClass implements drift.Insertable<Account> {
           {int? accountId,
           int? categoryId,
           int? templateId,
+          String? accountName,
           String? colorHex,
           double? budgetAmount,
           drift.Value<double?> expenditureTotal = const drift.Value.absent(),
@@ -1756,6 +1783,7 @@ class Account extends drift.DataClass implements drift.Insertable<Account> {
         accountId: accountId ?? this.accountId,
         categoryId: categoryId ?? this.categoryId,
         templateId: templateId ?? this.templateId,
+        accountName: accountName ?? this.accountName,
         colorHex: colorHex ?? this.colorHex,
         budgetAmount: budgetAmount ?? this.budgetAmount,
         expenditureTotal: expenditureTotal.present
@@ -1772,6 +1800,8 @@ class Account extends drift.DataClass implements drift.Insertable<Account> {
           data.categoryId.present ? data.categoryId.value : this.categoryId,
       templateId:
           data.templateId.present ? data.templateId.value : this.templateId,
+      accountName:
+          data.accountName.present ? data.accountName.value : this.accountName,
       colorHex: data.colorHex.present ? data.colorHex.value : this.colorHex,
       budgetAmount: data.budgetAmount.present
           ? data.budgetAmount.value
@@ -1793,6 +1823,7 @@ class Account extends drift.DataClass implements drift.Insertable<Account> {
           ..write('accountId: $accountId, ')
           ..write('categoryId: $categoryId, ')
           ..write('templateId: $templateId, ')
+          ..write('accountName: $accountName, ')
           ..write('colorHex: $colorHex, ')
           ..write('budgetAmount: $budgetAmount, ')
           ..write('expenditureTotal: $expenditureTotal, ')
@@ -1803,8 +1834,16 @@ class Account extends drift.DataClass implements drift.Insertable<Account> {
   }
 
   @override
-  int get hashCode => Object.hash(accountId, categoryId, templateId, colorHex,
-      budgetAmount, expenditureTotal, responsibleParticipantId, dateCreated);
+  int get hashCode => Object.hash(
+      accountId,
+      categoryId,
+      templateId,
+      accountName,
+      colorHex,
+      budgetAmount,
+      expenditureTotal,
+      responsibleParticipantId,
+      dateCreated);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1812,6 +1851,7 @@ class Account extends drift.DataClass implements drift.Insertable<Account> {
           other.accountId == this.accountId &&
           other.categoryId == this.categoryId &&
           other.templateId == this.templateId &&
+          other.accountName == this.accountName &&
           other.colorHex == this.colorHex &&
           other.budgetAmount == this.budgetAmount &&
           other.expenditureTotal == this.expenditureTotal &&
@@ -1823,6 +1863,7 @@ class AccountsCompanion extends drift.UpdateCompanion<Account> {
   final drift.Value<int> accountId;
   final drift.Value<int> categoryId;
   final drift.Value<int> templateId;
+  final drift.Value<String> accountName;
   final drift.Value<String> colorHex;
   final drift.Value<double> budgetAmount;
   final drift.Value<double?> expenditureTotal;
@@ -1832,6 +1873,7 @@ class AccountsCompanion extends drift.UpdateCompanion<Account> {
     this.accountId = const drift.Value.absent(),
     this.categoryId = const drift.Value.absent(),
     this.templateId = const drift.Value.absent(),
+    this.accountName = const drift.Value.absent(),
     this.colorHex = const drift.Value.absent(),
     this.budgetAmount = const drift.Value.absent(),
     this.expenditureTotal = const drift.Value.absent(),
@@ -1842,6 +1884,7 @@ class AccountsCompanion extends drift.UpdateCompanion<Account> {
     this.accountId = const drift.Value.absent(),
     required int categoryId,
     required int templateId,
+    required String accountName,
     required String colorHex,
     required double budgetAmount,
     this.expenditureTotal = const drift.Value.absent(),
@@ -1849,6 +1892,7 @@ class AccountsCompanion extends drift.UpdateCompanion<Account> {
     required DateTime dateCreated,
   })  : categoryId = drift.Value(categoryId),
         templateId = drift.Value(templateId),
+        accountName = drift.Value(accountName),
         colorHex = drift.Value(colorHex),
         budgetAmount = drift.Value(budgetAmount),
         responsibleParticipantId = drift.Value(responsibleParticipantId),
@@ -1857,6 +1901,7 @@ class AccountsCompanion extends drift.UpdateCompanion<Account> {
     drift.Expression<int>? accountId,
     drift.Expression<int>? categoryId,
     drift.Expression<int>? templateId,
+    drift.Expression<String>? accountName,
     drift.Expression<String>? colorHex,
     drift.Expression<double>? budgetAmount,
     drift.Expression<double>? expenditureTotal,
@@ -1867,6 +1912,7 @@ class AccountsCompanion extends drift.UpdateCompanion<Account> {
       if (accountId != null) 'account_id': accountId,
       if (categoryId != null) 'category_id': categoryId,
       if (templateId != null) 'template_id': templateId,
+      if (accountName != null) 'account_name': accountName,
       if (colorHex != null) 'color_hex': colorHex,
       if (budgetAmount != null) 'budget_amount': budgetAmount,
       if (expenditureTotal != null) 'expenditure_total': expenditureTotal,
@@ -1880,6 +1926,7 @@ class AccountsCompanion extends drift.UpdateCompanion<Account> {
       {drift.Value<int>? accountId,
       drift.Value<int>? categoryId,
       drift.Value<int>? templateId,
+      drift.Value<String>? accountName,
       drift.Value<String>? colorHex,
       drift.Value<double>? budgetAmount,
       drift.Value<double?>? expenditureTotal,
@@ -1889,6 +1936,7 @@ class AccountsCompanion extends drift.UpdateCompanion<Account> {
       accountId: accountId ?? this.accountId,
       categoryId: categoryId ?? this.categoryId,
       templateId: templateId ?? this.templateId,
+      accountName: accountName ?? this.accountName,
       colorHex: colorHex ?? this.colorHex,
       budgetAmount: budgetAmount ?? this.budgetAmount,
       expenditureTotal: expenditureTotal ?? this.expenditureTotal,
@@ -1909,6 +1957,9 @@ class AccountsCompanion extends drift.UpdateCompanion<Account> {
     }
     if (templateId.present) {
       map['template_id'] = drift.Variable<int>(templateId.value);
+    }
+    if (accountName.present) {
+      map['account_name'] = drift.Variable<String>(accountName.value);
     }
     if (colorHex.present) {
       map['color_hex'] = drift.Variable<String>(colorHex.value);
@@ -1935,6 +1986,7 @@ class AccountsCompanion extends drift.UpdateCompanion<Account> {
           ..write('accountId: $accountId, ')
           ..write('categoryId: $categoryId, ')
           ..write('templateId: $templateId, ')
+          ..write('accountName: $accountName, ')
           ..write('colorHex: $colorHex, ')
           ..write('budgetAmount: $budgetAmount, ')
           ..write('expenditureTotal: $expenditureTotal, ')
@@ -6632,6 +6684,7 @@ typedef $$AccountsTableCreateCompanionBuilder = AccountsCompanion Function({
   drift.Value<int> accountId,
   required int categoryId,
   required int templateId,
+  required String accountName,
   required String colorHex,
   required double budgetAmount,
   drift.Value<double?> expenditureTotal,
@@ -6642,6 +6695,7 @@ typedef $$AccountsTableUpdateCompanionBuilder = AccountsCompanion Function({
   drift.Value<int> accountId,
   drift.Value<int> categoryId,
   drift.Value<int> templateId,
+  drift.Value<String> accountName,
   drift.Value<String> colorHex,
   drift.Value<double> budgetAmount,
   drift.Value<double?> expenditureTotal,
@@ -6727,6 +6781,10 @@ class $$AccountsTableFilterComposer
   });
   drift.ColumnFilters<int> get accountId => $composableBuilder(
       column: $table.accountId,
+      builder: (column) => drift.ColumnFilters(column));
+
+  drift.ColumnFilters<String> get accountName => $composableBuilder(
+      column: $table.accountName,
       builder: (column) => drift.ColumnFilters(column));
 
   drift.ColumnFilters<String> get colorHex => $composableBuilder(
@@ -6840,6 +6898,10 @@ class $$AccountsTableOrderingComposer
       column: $table.accountId,
       builder: (column) => drift.ColumnOrderings(column));
 
+  drift.ColumnOrderings<String> get accountName => $composableBuilder(
+      column: $table.accountName,
+      builder: (column) => drift.ColumnOrderings(column));
+
   drift.ColumnOrderings<String> get colorHex => $composableBuilder(
       column: $table.colorHex,
       builder: (column) => drift.ColumnOrderings(column));
@@ -6928,6 +6990,9 @@ class $$AccountsTableAnnotationComposer
   });
   drift.GeneratedColumn<int> get accountId =>
       $composableBuilder(column: $table.accountId, builder: (column) => column);
+
+  drift.GeneratedColumn<String> get accountName => $composableBuilder(
+      column: $table.accountName, builder: (column) => column);
 
   drift.GeneratedColumn<String> get colorHex =>
       $composableBuilder(column: $table.colorHex, builder: (column) => column);
@@ -7053,6 +7118,7 @@ class $$AccountsTableTableManager extends drift.RootTableManager<
             drift.Value<int> accountId = const drift.Value.absent(),
             drift.Value<int> categoryId = const drift.Value.absent(),
             drift.Value<int> templateId = const drift.Value.absent(),
+            drift.Value<String> accountName = const drift.Value.absent(),
             drift.Value<String> colorHex = const drift.Value.absent(),
             drift.Value<double> budgetAmount = const drift.Value.absent(),
             drift.Value<double?> expenditureTotal = const drift.Value.absent(),
@@ -7064,6 +7130,7 @@ class $$AccountsTableTableManager extends drift.RootTableManager<
             accountId: accountId,
             categoryId: categoryId,
             templateId: templateId,
+            accountName: accountName,
             colorHex: colorHex,
             budgetAmount: budgetAmount,
             expenditureTotal: expenditureTotal,
@@ -7074,6 +7141,7 @@ class $$AccountsTableTableManager extends drift.RootTableManager<
             drift.Value<int> accountId = const drift.Value.absent(),
             required int categoryId,
             required int templateId,
+            required String accountName,
             required String colorHex,
             required double budgetAmount,
             drift.Value<double?> expenditureTotal = const drift.Value.absent(),
@@ -7084,6 +7152,7 @@ class $$AccountsTableTableManager extends drift.RootTableManager<
             accountId: accountId,
             categoryId: categoryId,
             templateId: templateId,
+            accountName: accountName,
             colorHex: colorHex,
             budgetAmount: budgetAmount,
             expenditureTotal: expenditureTotal,

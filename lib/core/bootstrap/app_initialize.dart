@@ -12,6 +12,16 @@ Future<void> initializeApp() async {
   await dotenv.load(fileName: ".env");
   await setupServiceLocator();
 
+  // Supperss unwanted errors
+  FlutterError.onError = (FlutterErrorDetails details) {
+    // Filter out the mouse tracker assertion
+    if (details.toString().contains('_debugDuringDeviceUpdate')) {
+      return; // Ignore this specific error
+    }
+    FlutterError.presentError(details);
+  };
+
+// syncfusion
   final key = dotenv.env['SYNCFUSION_LICENSE'];
   if (key != null && key.isNotEmpty) {
     SyncfusionLicense.registerLicense(key);

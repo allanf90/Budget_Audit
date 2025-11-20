@@ -118,6 +118,7 @@ class CategoryWidget extends StatelessWidget {
           if (category.accounts.isNotEmpty)
             ...category.accounts.map((account) {
               return AccountRow(
+                key: ValueKey(account.id),
                 categoryId: category.id,
                 account: account,
               );

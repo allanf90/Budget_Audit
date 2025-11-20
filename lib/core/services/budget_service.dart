@@ -132,6 +132,7 @@ class AccountService {
         accountId: a.accountId,
         categoryId: a.categoryId,
         templateId: a.templateId,
+        accountName: a.accountName,
         colorHex: a.colorHex,
         budgetAmount: a.budgetAmount,
         expenditureTotal: a.expenditureTotal ?? 0.0,
@@ -160,6 +161,7 @@ class AccountService {
         accountId: a.accountId,
         categoryId: a.categoryId,
         templateId: a.templateId,
+        accountName: a.accountName,
         colorHex: a.colorHex,
         budgetAmount: a.budgetAmount,
         expenditureTotal: a.expenditureTotal ?? 0.0,
@@ -184,6 +186,7 @@ class AccountService {
           .map((a) => models.Account(
         accountId: a.accountId,
         categoryId: a.categoryId,
+        accountName: a.accountName,
         templateId: a.templateId,
         colorHex: a.colorHex,
         budgetAmount: a.budgetAmount,
@@ -237,6 +240,7 @@ class AccountService {
       final entry = AccountsCompanion.insert(
         categoryId: newAccount.categoryId,
         templateId: newAccount.templateId,
+        accountName: newAccount.accountName,
         colorHex: newAccount.colorHex,
         budgetAmount: newAccount.budgetAmount,
         expenditureTotal: drift.Value(newAccount.expenditureTotal ?? 0.0),

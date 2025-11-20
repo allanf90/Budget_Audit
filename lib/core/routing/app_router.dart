@@ -26,9 +26,10 @@ class AppRouter {
       case '/budgeting':
         return MaterialPageRoute(
           builder: (_) => ChangeNotifierProvider(
-            create: (_) => BudgetingViewModel(
+            create: (context) => BudgetingViewModel(
               sl<BudgetService>(),
               sl<ParticipantService>(),
+              Provider.of<AppContext>(context, listen: false),
             ),
             child: const BudgetingView(),
           ),

@@ -5,6 +5,7 @@ class Account {
   final int categoryId;
   final int templateId;
   final String colorHex;
+  final String accountName;
   final double budgetAmount;
   final double expenditureTotal;
   final int responsibleParticipantId;
@@ -19,6 +20,7 @@ class Account {
   Account({
     required this.categoryId,
     required this.templateId,
+    required this.accountName,
     required this.colorHex,
     required this.budgetAmount,
     required this.expenditureTotal,

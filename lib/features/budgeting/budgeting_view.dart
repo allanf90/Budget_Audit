@@ -20,6 +20,9 @@ class BudgetingView extends StatefulWidget {
 }
 
 class _BudgetingViewState extends State<BudgetingView> {
+  // Cache for template data futures to prevent recreation on rebuild
+  final Map<int, Future<_TemplateData>> _templateDataCache = {};
+
   @override
   void initState() {
     super.initState();
@@ -29,7 +32,15 @@ class _BudgetingViewState extends State<BudgetingView> {
   }
 
   @override
+  void dispose() {
+    _templateDataCache.clear();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final appContext = Provider.of<AppContext>(context);
+
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       body: SafeArea(
@@ -50,7 +61,7 @@ class _BudgetingViewState extends State<BudgetingView> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildMainContainer(context, viewModel),
+                        _buildMainContainer(context, viewModel, appContext),
                       ],
                     ),
                   ),
@@ -63,7 +74,7 @@ class _BudgetingViewState extends State<BudgetingView> {
     );
   }
 
-  Widget _buildMainContainer(BuildContext context, BudgetingViewModel viewModel) {
+  Widget _buildMainContainer(BuildContext context, BudgetingViewModel viewModel, AppContext appContext) {
     return Container(
       padding: const EdgeInsets.all(AppTheme.spacingXl),
       decoration: BoxDecoration(
@@ -85,7 +96,7 @@ class _BudgetingViewState extends State<BudgetingView> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'Create a Budget Template to start',
+                'Create a Budget Template',
                 style: AppTheme.bodyLarge,
               ),
               const SizedBox(height: AppTheme.spacingXs),
@@ -123,7 +134,7 @@ class _BudgetingViewState extends State<BudgetingView> {
                     ImportOptionCard(
                       title: 'Import a previous template',
                       description: 'This explores your previous templates',
-                      onTap: () => _showTemplateHistory(context, viewModel),
+                      onTap: () => _showTemplateHistory(context),
                     ),
                   ],
                 );
@@ -152,7 +163,7 @@ class _BudgetingViewState extends State<BudgetingView> {
                     child: ImportOptionCard(
                       title: 'Import a previous template',
                       description: 'This explores your previous templates',
-                      onTap: () => _showTemplateHistory(context, viewModel),
+                      onTap: () => _showTemplateHistory(context),
                     ),
                   ),
                 ],
@@ -181,6 +192,9 @@ class _BudgetingViewState extends State<BudgetingView> {
           ),
 
           const SizedBox(height: AppTheme.spacingMd),
+
+          _buildInformationBox(appContext),
+          const SizedBox(height: AppTheme.spacingXl),
 
           // Search and filter
           const SearchFilterBar(),
@@ -225,8 +239,6 @@ class _BudgetingViewState extends State<BudgetingView> {
             ),
           ),
 
-
-
           const SizedBox(height: AppTheme.spacing2xl),
 
           // Save/Update buttons
@@ -261,6 +273,49 @@ class _BudgetingViewState extends State<BudgetingView> {
             'Add your first category to start building your budget',
             style: AppTheme.bodyMedium.copyWith(color: AppTheme.textTertiary),
             textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInformationBox(AppContext appContext) {
+    final currentTemplate = appContext.currentTemplate;
+
+    return Container(
+      padding: const EdgeInsets.all(AppTheme.spacingMd),
+      decoration: BoxDecoration(
+        color: AppTheme.primaryBlue.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+        border: Border.all(color: AppTheme.primaryBlue.withOpacity(0.2)),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            currentTemplate != null ? Icons.info_outline : Icons.lightbulb_outline,
+            color: AppTheme.primaryBlue,
+            size: 24,
+          ),
+          const SizedBox(width: AppTheme.spacingMd),
+          Expanded(
+            child: currentTemplate != null
+                ? RichText(
+              text: TextSpan(
+                style: AppTheme.bodyMedium.copyWith(color: AppTheme.textSecondary),
+                children: [
+                  const TextSpan(text: 'You are currently working on the "'),
+                  TextSpan(
+                    text: currentTemplate.templateName,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const TextSpan(text: '" template.'),
+                ],
+              ),
+            )
+                : Text(
+              'You don\'t have an active budget. Create a new template or import a previous one to get started.',
+              style: AppTheme.bodyMedium.copyWith(color: AppTheme.textSecondary),
+            ),
           ),
         ],
       ),
@@ -345,97 +400,116 @@ class _BudgetingViewState extends State<BudgetingView> {
     );
   }
 
-  void _showTemplateHistory(BuildContext context, BudgetingViewModel viewModel) {
+  void _showTemplateHistory(BuildContext context) {
+    // Capture the viewModel from the current context before opening modal
+    final viewModel = context.read<BudgetingViewModel>();
+
     showModalBox(
       context: context,
       width: 800,
       height: 600,
-      child: Consumer<AppContext>(
-        builder: (context, appContext, _) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Template History',
-                style: AppTheme.h2,
-              ),
-              const SizedBox(height: AppTheme.spacingMd),
-              Text(
-                'Select a template to adopt or manage your previous templates',
-                style: AppTheme.bodyMedium.copyWith(color: AppTheme.textSecondary),
-              ),
-              const SizedBox(height: AppTheme.spacingLg),
-              Expanded(
-                child: viewModel.templates.isEmpty
-                    ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.history,
-                        size: 64,
-                        color: AppTheme.textTertiary,
-                      ),
-                      const SizedBox(height: AppTheme.spacingMd),
-                      Text(
-                        'No previous templates',
-                        style: AppTheme.h3.copyWith(
-                          color: AppTheme.textSecondary,
-                        ),
-                      ),
-                      const SizedBox(height: AppTheme.spacingXs),
-                      Text(
-                        'Your saved templates will appear here',
-                        style: AppTheme.bodyMedium.copyWith(
-                          color: AppTheme.textTertiary,
-                        ),
-                      ),
-                    ],
+      child: Builder(
+        builder: (modalContext) {
+          // Use the outer context's viewModel, but modal's context for AppContext
+          return Consumer<AppContext>(
+            builder: (_, appContext, __) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Template History',
+                    style: AppTheme.h2,
                   ),
-                )
-                    : ListView.builder(
-                  itemCount: viewModel.templates.length,
-                  itemBuilder: (context, index) {
-                    final template = viewModel.templates[index];
-                    final isCurrent = appContext.currentTemplate?.templateId == template.templateId;
-
-                    return Padding(
-                      padding: const EdgeInsets.only(
-                        bottom: AppTheme.spacingMd,
-                      ),
-                      child: FutureBuilder<_TemplateData>(
-                        future: _loadTemplateData(viewModel, template.templateId),
-                        builder: (context, snapshot) {
-                          final templateData = snapshot.data;
-                          final totalBudget = templateData?.totalBudget ?? 0.0;
-                          final participants = templateData?.participants ?? [];
-
-                          return TemplateHistoryItem(
-                            template: template,
-                            participants: participants,
-                            totalBudget: totalBudget,
-                            isCurrent: isCurrent,
-                            onAdopt: () => _handleAdoptTemplate(
-                              context,
-                              viewModel,
-                              template,
+                  const SizedBox(height: AppTheme.spacingMd),
+                  Text(
+                    'Select a template to adopt or manage your previous templates',
+                    style: AppTheme.bodyMedium.copyWith(color: AppTheme.textSecondary),
+                  ),
+                  const SizedBox(height: AppTheme.spacingLg),
+                  Expanded(
+                    child: viewModel.templates.isEmpty
+                        ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.history,
+                            size: 64,
+                            color: AppTheme.textTertiary,
+                          ),
+                          const SizedBox(height: AppTheme.spacingMd),
+                          Text(
+                            'No previous templates',
+                            style: AppTheme.h3.copyWith(
+                              color: AppTheme.textSecondary,
                             ),
-                            onDelete: () => _handleDeleteTemplate(
-                              context,
-                              viewModel,
-                              template,
+                          ),
+                          const SizedBox(height: AppTheme.spacingXs),
+                          Text(
+                            'Your saved templates will appear here',
+                            style: AppTheme.bodyMedium.copyWith(
+                              color: AppTheme.textTertiary,
                             ),
-                          );
-                        },
+                          ),
+                        ],
                       ),
-                    );
-                  },
-                ),
-              ),
-            ],
+                    )
+                        : ListView.builder(
+                      itemCount: viewModel.templates.length,
+                      itemBuilder: (context, index) {
+                        final template = viewModel.templates[index];
+                        final isCurrent = appContext.currentTemplate?.templateId == template.templateId;
+
+                        return Padding(
+                          padding: const EdgeInsets.only(
+                            bottom: AppTheme.spacingMd,
+                          ),
+                          child: FutureBuilder<_TemplateData>(
+                            future: _getCachedTemplateData(viewModel, template.templateId),
+                            builder: (context, snapshot) {
+                              final templateData = snapshot.data;
+                              final totalBudget = templateData?.totalBudget ?? 0.0;
+                              final participants = templateData?.participants ?? [];
+
+                              return TemplateHistoryItem(
+                                template: template,
+                                participants: participants,
+                                totalBudget: totalBudget,
+                                isCurrent: isCurrent,
+                                onAdopt: () => _handleAdoptTemplate(
+                                  modalContext,
+                                  viewModel,
+                                  template,
+                                ),
+                                onDelete: () => _handleDeleteTemplate(
+                                  modalContext,
+                                  viewModel,
+                                  template,
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              );
+            },
           );
         },
       ),
+    );
+  }
+
+  /// Gets cached template data future to prevent recreation on rebuild
+  Future<_TemplateData> _getCachedTemplateData(
+      BudgetingViewModel viewModel,
+      int templateId,
+      ) {
+    return _templateDataCache.putIfAbsent(
+      templateId,
+          () => _loadTemplateData(viewModel, templateId),
     );
   }
 
@@ -528,13 +602,15 @@ class _BudgetingViewState extends State<BudgetingView> {
                     if (currentParticipant != null) {
                       await viewModel.adoptTemplate(template, currentParticipant.participantId);
                       appContext.setCurrentTemplate(template);
-                      Navigator.of(context).pop(); // Close template history modal
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Template adopted successfully!'),
-                          backgroundColor: AppTheme.success,
-                        ),
-                      );
+                      if (context.mounted) {
+                        Navigator.of(context).pop(); // Close template history modal
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Template adopted successfully!'),
+                            backgroundColor: AppTheme.success,
+                          ),
+                        );
+                      }
                     }
                   });
                 },
@@ -551,14 +627,16 @@ class _BudgetingViewState extends State<BudgetingView> {
                 if (currentParticipant != null) {
                   await viewModel.adoptTemplate(template, currentParticipant.participantId);
                   appContext.setCurrentTemplate(template);
-                  Navigator.of(context).pop(); // Close template history modal
+                  if (context.mounted) {
+                    Navigator.of(context).pop(); // Close template history modal
 
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Template adopted successfully!'),
-                      backgroundColor: AppTheme.success,
-                    ),
-                  );
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Template adopted successfully!'),
+                        backgroundColor: AppTheme.success,
+                      ),
+                    );
+                  }
                 }
               },
               style: TextButton.styleFrom(
@@ -584,25 +662,30 @@ class _BudgetingViewState extends State<BudgetingView> {
     final currentParticipant = appContext.currentParticipant;
 
     if (currentParticipant == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('No participant logged in'),
-          backgroundColor: AppTheme.error,
-        ),
-      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No participant logged in'),
+            backgroundColor: AppTheme.error,
+          ),
+        );
+      }
       return;
     }
 
     await viewModel.adoptTemplate(template, currentParticipant.participantId);
     appContext.setCurrentTemplate(template);
-    Navigator.of(context).pop(); // Close template history modal
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Template adopted successfully!'),
-        backgroundColor: AppTheme.success,
-      ),
-    );
+    if (context.mounted) {
+      Navigator.of(context).pop(); // Close template history modal
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Template adopted successfully!'),
+          backgroundColor: AppTheme.success,
+        ),
+      );
+    }
   }
 
   void _handleDeleteTemplate(
@@ -623,14 +706,16 @@ class _BudgetingViewState extends State<BudgetingView> {
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () {
-              viewModel.deleteTemplate(template.templateId);
-              Navigator.of(context).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Template deleted successfully'),
-                ),
-              );
+            onPressed: () async {
+              await viewModel.deleteTemplate(template.templateId);
+              if (context.mounted) {
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Template deleted successfully'),
+                  ),
+                );
+              }
             },
             style: TextButton.styleFrom(
               foregroundColor: AppTheme.error,
@@ -705,12 +790,14 @@ class _BudgetingViewState extends State<BudgetingView> {
                 final currentParticipant = appContext.currentParticipant;
 
                 if (currentParticipant == null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('No participant logged in'),
-                      backgroundColor: AppTheme.error,
-                    ),
-                  );
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('No participant logged in'),
+                        backgroundColor: AppTheme.error,
+                      ),
+                    );
+                  }
                   return;
                 }
 
@@ -720,21 +807,23 @@ class _BudgetingViewState extends State<BudgetingView> {
                   creatorParticipantId: currentParticipant.participantId,
                 );
 
-                if (success) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Template saved successfully!'),
-                      backgroundColor: AppTheme.success,
-                    ),
-                  );
-                  then?.call();
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(viewModel.errorMessage ?? 'Failed to save template'),
-                      backgroundColor: AppTheme.error,
-                    ),
-                  );
+                if (context.mounted) {
+                  if (success) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Template saved successfully!'),
+                        backgroundColor: AppTheme.success,
+                      ),
+                    );
+                    then?.call();
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(viewModel.errorMessage ?? 'Failed to save template'),
+                        backgroundColor: AppTheme.error,
+                      ),
+                    );
+                  }
                 }
               },
               child: const Text('Save'),
@@ -794,20 +883,22 @@ class _BudgetingViewState extends State<BudgetingView> {
                   templateName: currentTemplate.templateName,
                 );
 
-                if (success) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Template updated successfully!'),
-                      backgroundColor: AppTheme.success,
-                    ),
-                  );
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(viewModel.errorMessage ?? 'Failed to update template'),
-                      backgroundColor: AppTheme.error,
-                    ),
-                  );
+                if (context.mounted) {
+                  if (success) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Template updated successfully!'),
+                        backgroundColor: AppTheme.success,
+                      ),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(viewModel.errorMessage ?? 'Failed to update template'),
+                        backgroundColor: AppTheme.error,
+                      ),
+                    );
+                  }
                 }
               },
               style: TextButton.styleFrom(

@@ -82,6 +82,7 @@ class Account {
   final int accountId;
   final int categoryId;
   final int templateId;
+  final String accountName;
   final String colorHex;
   final double budgetAmount;
   final double expenditureTotal;
@@ -98,6 +99,7 @@ class Account {
     required this.accountId,
     required this.categoryId,
     required this.templateId,
+    required this.accountName,
     required this.colorHex,
     required this.budgetAmount,
     required this.expenditureTotal,
