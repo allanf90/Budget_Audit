@@ -127,11 +127,11 @@ class OnboardingViewModel extends ChangeNotifier {
     }
 
     // Password validation
-    if (password.isEmpty) {
+    if (password.isEmpty && _editingParticipantId == null) {
       return 'Password is required';
     }
 
-    if (password.length < 6) {
+    if (password.length < 6 && _editingParticipantId == null) {
       return 'Password must be at least 6 characters';
     }
 

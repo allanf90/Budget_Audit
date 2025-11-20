@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../core/models/models.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class AppContext extends ChangeNotifier {
   Participant? _currentParticipant;
@@ -24,12 +23,9 @@ class AppContext extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> clear() async {
+  void clear() {
     _currentParticipant = null;
     _currentTemplate = null;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('current_participant_id');
-    await prefs.remove('current_template_id');
     notifyListeners();
   }
 }
