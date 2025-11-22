@@ -57,7 +57,7 @@ class DevService {
   Map<String, dynamic> dumpContext() {
     return {
       "hasValidSession": _context.hasValidSession,
-      "activeParticipant": _context.currentParticipant,
+      "activeParticipantName": _context.currentParticipantDisplayName,
       "activeTemplate": _context.currentTemplate,
       "activeDisplayName": _context.currentParticipantDisplayName,
     };
