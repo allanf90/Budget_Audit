@@ -17,7 +17,8 @@ class AppHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
+    final mediaQuery = MediaQuery.of(context);
+    final screenHeight = mediaQuery.size.height;
     // Calculate max height (1/8th of screen)
     final maxHeaderHeight = screenHeight / 8;
     // Use provided logoHeight or calculate based on constraints, ensuring it's not too large
@@ -33,6 +34,8 @@ class AppHeader extends StatelessWidget {
           Image.asset(
             'assets/images/logo.png',
             height: effectiveLogoHeight,
+            cacheHeight:
+                (effectiveLogoHeight * mediaQuery.devicePixelRatio).round(),
             errorBuilder: (context, error, stackTrace) {
               return Container(
                 height: effectiveLogoHeight,

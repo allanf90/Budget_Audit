@@ -10,24 +10,47 @@ class DevService {
 
   /// Delete EVERY table and recreate them fresh
   Future<void> resetAllTables() async {
-    final executor = _db.createMigrator();
+    try {
+      // Disable foreign keys to allow dropping tables in any order
+      await _db.customStatement('PRAGMA foreign_keys = OFF');
 
-    for (final table in _db.allTables) {
-      await executor.deleteTable(table.actualTableName);
+      final executor = _db.createMigrator();
+
+      for (final table in _db.allTables) {
+        await executor.deleteTable(table.actualTableName);
+      }
+      await executor.createAll();
+    } catch (e) {
+      print("Error resetting tables: $e");
+    } finally {
+      // Re-enable foreign keys
+      try {
+        await _db.customStatement('PRAGMA foreign_keys = ON');
+        print("Database tables reset and pragma keys re-enabled");
+      } catch (e) {
+        print("Error re-enabling foreign keys: $e");
+      }
     }
-    await executor.createAll();
   }
 
   /// Delete a single table (and recreate empty)
   Future<void> resetSingleTable(String tableName) async {
-    final executor = _db.createMigrator();
-    await executor.deleteTable(tableName);
-    await executor.createAll();
+    try {
+      final executor = _db.createMigrator();
+      await executor.deleteTable(tableName);
+      await executor.createAll();
+    } catch (e) {
+      print("Error resetting table $tableName: $e");
+    }
   }
 
   /// Delete all records inside a table
   Future<void> clearTableRecords(String tableName) async {
-    await _db.customStatement("DELETE FROM $tableName");
+    try {
+      await _db.customStatement("DELETE FROM $tableName");
+    } catch (e) {
+      print("Error clearing table $tableName: $e");
+    }
   }
 
   /// Logs entire table content as a list of rows (Map<String, dynamic>)
