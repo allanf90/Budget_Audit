@@ -3,10 +3,11 @@ import 'package:provider/provider.dart';
 import 'onboarding_viewmodel.dart';
 import '../../core/widgets/app_header.dart';
 import 'widgets/participant_form.dart';
-import 'widgets/participant_list.dart';
+
 import 'widgets/participant_grid.dart';
 import 'widgets/sign_in_form.dart';
 import '../../core/theme/app_theme.dart';
+import '../../features/menu/menu.dart';
 
 class OnboardingView extends StatefulWidget {
   const OnboardingView({Key? key}) : super(key: key);
@@ -29,69 +30,31 @@ class _OnboardingViewState extends State<OnboardingView> {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
-            AppHeader(),
-            Expanded(
-              child: _buildContent(),
+            Column(
+              children: [
+                Consumer<OnboardingViewModel>(
+                  builder: (context, viewModel, _) {
+                    return AppHeader(
+                      subtitle: viewModel.isFirstParticipant
+                          ? 'Welcome! Let\'s set up your account'
+                          : 'Manage participants or sign in',
+                    );
+                  },
+                ),
+                Expanded(
+                  child: _buildContent(),
+                ),
+              ],
+            ),
+            const Positioned(
+              top: 12,
+              left: 24,
+              child: Menu(),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildHeader() {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 32),
-      child: Column(
-        children: [
-          // Logo
-          Image.asset(
-            'assets/images/logo.png',
-            height: 100,
-            errorBuilder: (context, error, stackTrace) {
-              return Container(
-                height: 100,
-                width: 100,
-                decoration: BoxDecoration(
-                  color: AppTheme.primaryPink.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Center(
-                  child: Text(
-                    'BA',
-                    style: TextStyle(
-                      fontSize: 40,
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.primaryPink,
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-          const SizedBox(height: 16),
-          // Title
-          Text(
-            'Budget Audit',
-            style: AppTheme.h1.copyWith(color: AppTheme.primaryPink),
-          ),
-          const SizedBox(height: 8),
-          Consumer<OnboardingViewModel>(
-            builder: (context, viewModel, _) {
-              return Text(
-                viewModel.isFirstParticipant
-                    ? 'Welcome! Let\'s set up your account'
-                    : 'Manage participants or sign in',
-                style: AppTheme.bodyMedium.copyWith(
-                  color: AppTheme.textSecondary,
-                ),
-                textAlign: TextAlign.center,
-              );
-            },
-          ),
-        ],
       ),
     );
   }
@@ -125,7 +88,8 @@ class _OnboardingViewState extends State<OnboardingView> {
                             : SignInForm(viewModel: viewModel),
                         const SizedBox(height: 24),
                         // Continue Button
-                        if (viewModel.canProceed()) _buildContinueButton(viewModel),
+                        if (viewModel.canProceed())
+                          _buildContinueButton(viewModel),
                       ],
                     ),
                   ),
@@ -148,7 +112,6 @@ class _OnboardingViewState extends State<OnboardingView> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-
                           const SizedBox(height: 16),
                           Expanded(
                             child: SingleChildScrollView(
@@ -156,7 +119,8 @@ class _OnboardingViewState extends State<OnboardingView> {
                             ),
                           ),
                           const SizedBox(height: 16),
-                          if (viewModel.canProceed()) _buildContinueButton(viewModel),
+                          if (viewModel.canProceed())
+                            _buildContinueButton(viewModel),
                         ],
                       ),
                     ),
@@ -207,7 +171,8 @@ class _OnboardingViewState extends State<OnboardingView> {
             child: _buildModeTab(
               label: 'Sign in as a participant',
               isSelected: viewModel.mode == OnboardingMode.signInAsParticipant,
-              onTap: () => viewModel.switchMode(OnboardingMode.signInAsParticipant),
+              onTap: () =>
+                  viewModel.switchMode(OnboardingMode.signInAsParticipant),
             ),
           ),
         ],
@@ -230,11 +195,11 @@ class _OnboardingViewState extends State<OnboardingView> {
           borderRadius: BorderRadius.circular(AppTheme.radiusMd),
           border: isSelected
               ? const Border(
-            bottom: BorderSide(
-              color: AppTheme.primaryPink,
-              width: 3,
-            ),
-          )
+                  bottom: BorderSide(
+                    color: AppTheme.primaryPink,
+                    width: 3,
+                  ),
+                )
               : null,
         ),
         child: Text(
@@ -271,7 +236,8 @@ class _OnboardingViewState extends State<OnboardingView> {
         child: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Continue to Budgeting (Dev env only)', style: AppTheme.button),
+            Text('Continue to Budgeting (Dev env only)',
+                style: AppTheme.button),
             SizedBox(width: 8),
             Icon(Icons.arrow_forward, size: 20),
           ],
