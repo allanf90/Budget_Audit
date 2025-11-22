@@ -21,6 +21,7 @@ class AppHeader extends StatelessWidget {
     return Stack(
       children: [
         Container(
+          width: double.infinity,
           padding: padding,
           child: Column(
             children: [
@@ -65,8 +66,9 @@ class AppHeader extends StatelessWidget {
           ),
         ),
         Positioned(
-          top: padding.top / 2, // Adjust position to be vertically centered in the padding area
-          left: padding.right, // Align with the left edge of the padding
+          top: padding.top /
+              2, // Adjust position to be vertically centered in the padding area
+          left: padding.left, // Align with the left edge of the padding
           child: const Menu(),
         ),
       ],

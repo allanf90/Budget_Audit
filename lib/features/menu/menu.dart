@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-// Assuming imports for AppTheme and MenuViewModel are correct
-import '../../core/theme/app_theme.dart';
 import '../../core/theme/app_theme.dart';
 import './menu_viewmodel.dart';
 
@@ -28,23 +26,26 @@ class Menu extends StatelessWidget {
             size: 28,
           ),
           padding: EdgeInsets.zero,
-          color: AppTheme.surface,
+          // Glassmorphism: Semi-transparent surface
+          color: AppTheme.surface.withOpacity(0.85),
+          elevation: 0, // Remove default shadow for cleaner glass look
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+            borderRadius: BorderRadius.circular(AppTheme.radiusXl),
             side: const BorderSide(color: AppTheme.border, width: 1.0),
           ),
           onSelected: (String route) {
             viewModel.menuToggled();
             // ⭐️ LOGIC IS NOW IN THE VIEW MODEL ⭐️
             // Call the VM method to execute business logic (like signing out)
-            final requiresFullReset = viewModel.handleDestinationSelected(route);
+            final requiresFullReset =
+                viewModel.handleDestinationSelected(route);
 
             // UI's sole responsibility: execute the navigation requested by the VM logic
             if (requiresFullReset) {
               // Sign Out: Pop all routes and push the sign-out route
               Navigator.of(context).pushNamedAndRemoveUntil(
                 route,
-                    (Route<dynamic> r) => false,
+                (Route<dynamic> r) => false,
               );
             } else {
               // Standard Navigation: Navigate to the selected route
