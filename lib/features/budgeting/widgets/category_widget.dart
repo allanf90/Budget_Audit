@@ -8,6 +8,7 @@ import '../budgeting_viewmodel.dart';
 import 'account_row.dart';
 import 'participant_avatar.dart';
 import 'inline_editable_text.dart';
+import '../../../core/utils/color_palette.dart';
 
 class CategoryWidget extends StatelessWidget {
   final CategoryData category;
@@ -54,14 +55,14 @@ class CategoryWidget extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 12,
-              height: 12,
+              width: 10,
+              height: 32,
               decoration: BoxDecoration(
                 color: category.color,
-                shape: BoxShape.circle,
+                borderRadius: BorderRadius.circular(6),
               ),
             ),
-            const SizedBox(width: AppTheme.spacingXs),
+            const SizedBox(width: AppTheme.spacingSm),
             Flexible(
               child: Text(
                 category.name,
@@ -81,15 +82,7 @@ class CategoryWidget extends StatelessWidget {
             fontWeight: FontWeight.w500,
           ),
         ),
-        // Incomplete status
-        if (category.name == 'CATEGORY NAME' || category.totalBudget == 0)
-          Text(
-            'Incomplete',
-            style: AppTheme.bodySmall.copyWith(
-              color: AppTheme.warning,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
+        
         // Participants (if any)
         if (category.allParticipants.isNotEmpty)
           Row(
@@ -103,6 +96,18 @@ class CategoryWidget extends StatelessWidget {
                 ),
               );
             }).toList(),
+          ),
+
+          // Incomplete status
+        if (category.name == 'CATEGORY NAME' ||
+            category.totalBudget == 0 ||
+            category.accounts.any((a) => a.budgetAmount <= 0))
+          Text(
+            'Incomplete',
+            style: AppTheme.bodySmall.copyWith(
+              color: AppTheme.warning,
+              fontWeight: FontWeight.w600,
+            ),
           ),
       ],
       headerWidgets: [
@@ -279,25 +284,19 @@ class CategoryWidget extends StatelessWidget {
         return AlertDialog(
           title: const Text('Pick a color'),
           content: SingleChildScrollView(
-            child: ColorPicker(
+            child: BlockPicker(
               pickerColor: pickerColor,
+              availableColors: ColorPalette.all,
               onColorChanged: (color) {
-                pickerColor = color;
+                viewModel.updateCategoryColor(category.id, color);
+                Navigator.of(context).pop();
               },
-              pickerAreaHeightPercent: 0.8,
             ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
               child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                viewModel.updateCategoryColor(category.id, pickerColor);
-                Navigator.of(context).pop();
-              },
-              child: const Text('Select'),
             ),
           ],
         );

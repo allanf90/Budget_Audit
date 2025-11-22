@@ -222,14 +222,19 @@ class _BudgetingViewState extends State<BudgetingView> {
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              TextButton.icon(
-                onPressed: () => _launchBudgetingGuide(),
-                icon: const Icon(Icons.help_outline, size: 16),
-                label: Text(
-                  'Learn how budgeting works in the Budget Audit',
-                  style: AppTheme.bodySmall.copyWith(
-                    color: AppTheme.primaryBlue,
-                    decoration: TextDecoration.underline,
+              Flexible(
+                child: TextButton.icon(
+                  onPressed: () => _launchBudgetingGuide(),
+                  icon: const Icon(Icons.help_outline, size: 16),
+                  label: Flexible(
+                    child: Text(
+                      'Learn how budgeting works in the Budget Audit',
+                      style: AppTheme.bodySmall.copyWith(
+                        color: AppTheme.primaryBlue,
+                        decoration: TextDecoration.underline,
+                      ),
+                      overflow: TextOverflow.visible,
+                    ),
                   ),
                 ),
               ),

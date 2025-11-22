@@ -97,7 +97,6 @@ class _ContentBoxState extends State<ContentBox>
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    super.dispose();
   }
 
   void _toggleMinimize() {
@@ -117,9 +116,10 @@ class _ContentBoxState extends State<ContentBox>
       case ContentBoxAction.maximize:
         _toggleMinimize();
         break;
-      case ContentBoxAction.delete:
-        _showDeleteConfirmation(callback);
-        break;
+      // case ContentBoxAction.delete:
+      //   _showDeleteConfirmation(callback);
+      //   break;
+      //! Delete confirmation shall be on the onus of the parent widget
       default:
         callback?.call();
     }
@@ -232,28 +232,26 @@ class _ContentBoxState extends State<ContentBox>
         child: LayoutBuilder(
           builder: (context, constraints) {
             // Check if we have enough space for horizontal layout
-            final hasSpaceForHorizontal = constraints.maxWidth > 600;
+            // Using 600 as breakpoint for tablet/desktop vs mobile
+            final isSmallScreen = constraints.maxWidth < 600;
 
-            if (hasSpaceForHorizontal) {
+            if (isSmallScreen) {
+              // Stack vertically on smaller screens
               return Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Preview widgets - centered vertically
                   Expanded(
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: [
-                          for (int i = 0; i < previewsToShow.length; i++) ...[
-                            previewsToShow[i],
-                            if (i < previewsToShow.length - 1)
-                              SizedBox(width: widget.previewSpacing),
-                          ],
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        for (int i = 0; i < previewsToShow.length; i++) ...[
+                          previewsToShow[i],
+                          if (i < previewsToShow.length - 1)
+                            const SizedBox(height: 4),
                         ],
-                      ),
+                      ],
                     ),
                   ),
-                  // Controls - centered vertically
                   if (widget.controls.isNotEmpty) ...[
                     const SizedBox(width: 8),
                     _buildControls(),
@@ -261,25 +259,29 @@ class _ContentBoxState extends State<ContentBox>
                 ],
               );
             } else {
-              // Stack vertically on smaller screens
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
+              // Horizontal layout with equal width sections
+              return Row(
                 children: [
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
+                  Expanded(
                     child: Row(
                       children: [
-                        for (int i = 0; i < previewsToShow.length; i++) ...[
-                          previewsToShow[i],
-                          if (i < previewsToShow.length - 1)
-                            SizedBox(width: widget.previewSpacing),
-                        ],
+                        for (int i = 0; i < previewsToShow.length; i++)
+                          Expanded(
+                            child: Padding(
+                              padding: EdgeInsets.only(
+                                right: i < previewsToShow.length - 1 ? 16.0 : 0,
+                              ),
+                              child: previewsToShow[i],
+                            ),
+                          ),
+                        // Fill remaining slots if less than 4
+                        for (int i = previewsToShow.length; i < 4; i++)
+                          const Spacer(),
                       ],
                     ),
                   ),
                   if (widget.controls.isNotEmpty) ...[
-                    const SizedBox(height: 4),
+                    const SizedBox(width: 16),
                     _buildControls(),
                   ],
                 ],

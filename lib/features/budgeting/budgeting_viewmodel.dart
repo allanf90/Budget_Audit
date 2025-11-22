@@ -4,8 +4,8 @@ import '../../core/models/models.dart' as models;
 import '../../core/models/client_models.dart' as clientModels;
 import '../../core/services/budget_service.dart';
 import '../../core/services/participant_service.dart';
-import '../../core/services/service_locator.dart';
 import '../../core/utils/hex_to_color.dart';
+import '../../core/utils/color_palette.dart';
 
 enum FilterType { name, totalBudget, participant, color }
 
@@ -662,16 +662,7 @@ class BudgetingViewModel extends ChangeNotifier {
   }
 
   Color _generateRandomColor() {
-    final colors = [
-      const Color(0xFFFF6B9D),
-      const Color(0xFF7DD3FC),
-      const Color(0xFFA78BFA),
-      const Color(0xFF5EEAD4),
-      const Color(0xFFFBBF24),
-      const Color(0xFFF87171),
-      const Color(0xFF34D399),
-    ];
-    return colors[DateTime.now().millisecondsSinceEpoch % colors.length];
+    return ColorPalette.getRandom();
   }
 
   Color _generateLighterShade(Color baseColor) {
