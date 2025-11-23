@@ -446,9 +446,6 @@ class BudgetingViewModel extends ChangeNotifier {
         _categories.clear();
       }
 
-      // 4. Clear the working categories
-      _categories.clear();
-
       _isLoading = false;
       notifyListeners();
       return true;

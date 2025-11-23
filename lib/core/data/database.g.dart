@@ -1217,8 +1217,7 @@ class $CategoriesTable extends Categories
           additionalChecks: GeneratedColumn.checkTextLength(
               minTextLength: 1, maxTextLength: 100),
           type: DriftSqlType.string,
-          requiredDuringInsert: true,
-          defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'));
+          requiredDuringInsert: true);
   static const drift.VerificationMeta _colorHexMeta =
       const drift.VerificationMeta('colorHex');
   @override

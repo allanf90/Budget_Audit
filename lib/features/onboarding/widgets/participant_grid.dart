@@ -26,7 +26,10 @@ class ParticipantGrid extends StatelessWidget {
             // Calculate number of columns based on available width
             final itemWidth = 140.0;
             final spacing = 12.0;
-            final columns = ((constraints.maxWidth + spacing) / (itemWidth + spacing)).floor().clamp(2, 6);
+            final columns =
+                ((constraints.maxWidth + spacing) / (itemWidth + spacing))
+                    .floor()
+                    .clamp(2, 6);
 
             return Wrap(
               spacing: spacing,
@@ -47,8 +50,10 @@ class ParticipantGrid extends StatelessWidget {
     );
   }
 
-  Widget _buildParticipantBox(BuildContext context, models.Participant participant) {
-    final isEditing = viewModel.editingParticipantId == participant.participantId;
+  Widget _buildParticipantBox(
+      BuildContext context, models.Participant participant) {
+    final isEditing =
+        viewModel.editingParticipantId == participant.participantId;
     final isOwner = participant.role == models.Role.manager;
     final nickname = viewModel.getDisplayName(participant);
     final roleText = isOwner ? 'Editor, Owner' : 'Viewer';
@@ -57,10 +62,11 @@ class ParticipantGrid extends StatelessWidget {
       onTap: () => _showParticipantActions(context, participant),
       child: Container(
         width: 140,
-        height: 140,
+        height: 180,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isEditing ? AppTheme.primaryPink.withOpacity(0.05) : Colors.white,
+          color:
+              isEditing ? AppTheme.primaryPink.withOpacity(0.05) : Colors.white,
           borderRadius: BorderRadius.circular(AppTheme.radiusLg),
           border: Border.all(
             color: isEditing ? AppTheme.primaryPink : AppTheme.border,
@@ -202,7 +208,8 @@ class ParticipantGrid extends StatelessWidget {
     );
   }
 
-  void _showParticipantActions(BuildContext context, models.Participant participant) {
+  void _showParticipantActions(
+      BuildContext context, models.Participant participant) {
     final isOwner = participant.role == models.Role.manager;
 
     showModalBottomSheet(
@@ -274,9 +281,9 @@ class ParticipantGrid extends StatelessWidget {
   }
 
   void _showDeleteConfirmation(
-      BuildContext context,
-      models.Participant participant,
-      ) {
+    BuildContext context,
+    models.Participant participant,
+  ) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(

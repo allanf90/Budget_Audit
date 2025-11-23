@@ -28,10 +28,7 @@ class Participants extends drift.Table {
 
   drift.TextColumn get email => text().withLength(min: 1, max: 255).unique()();
 
-  drift.TextColumn get pwdhash => text().withLength(
-      min: 60,
-      max:
-          60)();
+  drift.TextColumn get pwdhash => text().withLength(min: 60, max: 60)();
 
 //@override
 //Set<drift.Column> get primaryKey => {participantId};
@@ -44,14 +41,13 @@ class Categories extends drift.Table {
   drift.IntColumn get templateId =>
       integer().references(Templates, #templateId)();
 
-  drift.TextColumn get categoryName =>
-      text().withLength(min: 1, max: 100).unique()();
+  drift.TextColumn get categoryName => text().withLength(min: 1, max: 100)();
 
   drift.TextColumn get colorHex => text().withLength(min: 7, max: 7)();
 
   @override
   List<Set<drift.Column>> get uniqueKeys => [
-        {templateId, categoryName}, 
+        {templateId, categoryName},
       ];
 //@override
 //Set<drift.Column> get primaryKey => {categoryId};
@@ -288,15 +284,13 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration {
     // Read the ENV variable from the loaded dotenv configuration.
     // Default to 'PRODUCTION' for safety if it's not set.
-    final isProduction = context.AppContext().isProduction;
-
-
+    final isProduction = !context.AppContext().isProduction; //TODO: (REMOVE NEGATION) For some reason is production is always true, I need it as false
 
     return MigrationStrategy(
       onCreate: (Migrator m) async {
@@ -304,7 +298,6 @@ class AppDatabase extends _$AppDatabase {
         await m.createAll();
       },
       onUpgrade: (Migrator m, int from, int to) async {
-
         if (!isProduction) {
           print("Running DEVELOPMENT migration (deleting all data)...");
           // Use allTables instead of allTablesAndViews
@@ -338,9 +331,9 @@ class AppDatabase extends _$AppDatabase {
               break;
 
             case 4: // Migrating from v4 to v5
-            // Use the alterTable function to apply the column change.
-            // drift will automatically generate the ALTER TABLE statement
-            // to make 'times_used' nullable.
+              // Use the alterTable function to apply the column change.
+              // drift will automatically generate the ALTER TABLE statement
+              // to make 'times_used' nullable.
               await m.alterTable(
                 TableMigration(
                   templates,
@@ -349,6 +342,22 @@ class AppDatabase extends _$AppDatabase {
                   },
                 ),
               );
+              await m.alterTable(TableMigration(categories));
+              break;
+
+              case 5:
+              await m.renameTable(categories, 'categories_old');
+              await m.createTable(categories);
+
+              await customStatement('''
+                INSERT INTO categories (category_id, template_id, category_name, color_hex)
+                SELECT category_id, template_id, category_name, color_hex
+                FROM categories_old
+              ''');
+
+              await m.deleteTable('categories_old');
+              
+              print("Migrated Categories to use composite unique keys.");
               break;
           }
         }
@@ -359,7 +368,6 @@ class AppDatabase extends _$AppDatabase {
       },
     );
   }
-
 
 // Optional: Define DAOs here or in separate files
 // (e.g., ParticipantDao, BudgetDao, etc.)

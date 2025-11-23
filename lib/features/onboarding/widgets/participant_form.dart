@@ -37,6 +37,10 @@ class ParticipantForm extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
+            if (viewModel.isFirstParticipant) ...[
+              _buildAdminNotification(),
+              const SizedBox(height: 24),
+            ],
             _buildForm(context),
             if (viewModel.error != null) ...[
               const SizedBox(height: 16),
@@ -295,6 +299,45 @@ class ParticipantForm extends StatelessWidget {
                 isEditing ? 'Update Participant' : 'Create new Participant',
                 style: AppTheme.button,
               ),
+      ),
+    );
+  }
+
+  Widget _buildAdminNotification() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppTheme.primaryBlue.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+        border: Border.all(color: AppTheme.primaryBlue.withOpacity(0.3)),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.admin_panel_settings_outlined,
+              color: AppTheme.primaryBlue, size: 24),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Admin Role',
+                  style: AppTheme.label.copyWith(
+                    color: AppTheme.primaryBlue,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'As the first participant, you will be assigned the Admin role with full access to manage the budget.',
+                  style: AppTheme.bodySmall.copyWith(
+                    color: AppTheme.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
