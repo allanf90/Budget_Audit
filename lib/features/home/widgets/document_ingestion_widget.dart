@@ -241,7 +241,7 @@ class _DocumentIngestionWidgetState extends State<DocumentIngestionWidget> {
             return DropdownMenuItem(
               value: participant.participantId,
               child: Text(
-                participant.nickName ?? participant.firstName,
+                participant.nickname ?? participant.firstName,
                 style: AppTheme.bodyMedium,
               ),
             );

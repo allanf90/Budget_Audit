@@ -82,7 +82,7 @@ class CategoryWidget extends StatelessWidget {
             fontWeight: FontWeight.w500,
           ),
         ),
-        
+
         // Participants (if any)
         if (category.allParticipants.isNotEmpty)
           Row(
@@ -98,7 +98,7 @@ class CategoryWidget extends StatelessWidget {
             }).toList(),
           ),
 
-          // Incomplete status
+        // Incomplete status
         if (category.name == 'CATEGORY NAME' ||
             category.totalBudget == 0 ||
             category.accounts.any((a) => a.budgetAmount <= 0))
@@ -286,7 +286,7 @@ class CategoryWidget extends StatelessWidget {
           content: SingleChildScrollView(
             child: BlockPicker(
               pickerColor: pickerColor,
-              availableColors: ColorPalette.all,
+              availableColors: ColorPalette.all.map((nc) => nc.color).toList(),
               onColorChanged: (color) {
                 viewModel.updateCategoryColor(category.id, color);
                 Navigator.of(context).pop();

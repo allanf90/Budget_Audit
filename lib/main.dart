@@ -43,7 +43,7 @@ class BudgetAudit extends StatelessWidget {
     String initialRoute = '/onboarding';
 
     if (appContext.hasValidSession) {
-      initialRoute = '/budgeting';
+      initialRoute = '/home';
     }
     return MaterialApp(
       title: 'BudgetAudit',

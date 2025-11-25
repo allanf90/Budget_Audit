@@ -1,5 +1,6 @@
 // lib/features/home/home_view.dart
 
+import 'package:budget_audit/features/menu/menu.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_theme.dart';
@@ -21,18 +22,28 @@ class HomeView extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
-            const AppHeader(
-              subtitle: 'Document Analysis & Transaction Extraction',
-            ),
-            Expanded(
-              child: isWideScreen
-                  ? _buildWideScreenLayout(context, viewModel)
-                  : _buildNarrowScreenLayout(context, viewModel),
-            ),
-          ],
-        ),
+            Column(
+            children: [
+              const AppHeader(
+                subtitle: 'Document Analysis & Transaction Extraction',
+              ),
+              Expanded(
+                child: isWideScreen
+                    ? _buildWideScreenLayout(context, viewModel)
+                    : _buildNarrowScreenLayout(context, viewModel),
+              ),
+            ],
+          ),
+          const Positioned(
+            top: 12, // Align with AppHeader padding
+            left: 24,
+            child: Menu(),
+          ),
+          ]
+        )
+        
       ),
     );
   }
