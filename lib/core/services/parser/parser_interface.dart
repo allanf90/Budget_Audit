@@ -1,6 +1,8 @@
 // lib/core/services/parser/parser_interface.dart
 
 import 'dart:io';
+import 'package:syncfusion_flutter_pdf/pdf.dart';
+
 import '../../models/client_models.dart';
 
 /// Abstract base class for all bank statement parsers
@@ -79,7 +81,17 @@ abstract class StatementParser {
   /// - Correct password was provided and PDF was unlocked
   ///
   /// Returns false if password is incorrect or PDF cannot be opened
-  Future<bool> unlockPdf(File pdfFile, String? password);
+  Future<bool> unlockPdf(File pdfFile, String? password) async {
+    try {
+      final doc = PdfDocument(
+          inputBytes: pdfFile.readAsBytesSync(), password: password);
+      doc.dispose();
+      return true;
+    } catch (e) {
+      // If the document fails to load or the password is wrong
+      return false;
+    }
+  }
 
   /// Validates that extracted text contains expected patterns
   ///
@@ -132,5 +144,12 @@ abstract class StatementParser {
   /// - Debit/credit indicators
   ///
   /// Returns null if amount cannot be parsed
-  double? parseAmount(String amountString);
+  double? parseAmount(String amountString){
+    final cleaned = amountString.replaceAll(RegExp(r'[£KES\$\s,]'), '').trim();
+    try {
+      return double.parse(cleaned);
+    } catch (e) {
+      return null;
+    }
+  }
 }

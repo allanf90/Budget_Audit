@@ -6,7 +6,7 @@ import 'package:uuid/uuid.dart';
 import '../../models/client_models.dart';
 import 'parser_interface.dart';
 
-class MPesaParser implements StatementParser {
+class MPesaParser extends StatementParser {
   @override
   FinancialInstitution get institution => FinancialInstitution.mpesa;
 
@@ -169,7 +169,7 @@ class MPesaParser implements StatementParser {
           useMemory: false,
         ));
         //? Uncomment to sample output
-        // if (times > 0) { 
+        // if (times > 0) {
         //   print(
         //       "test transactions picked: \n Date: $transactionDate\n VendorName: ${normalizeVendorName(rawDetails)} \n Amount: $finalAmount \n OriginalDescription: $rawDetails");
         //       times -= 1;
@@ -244,34 +244,22 @@ class MPesaParser implements StatementParser {
     }
   }
 
-  @override
-  double? parseAmount(String amountString) {
-    // Remove commas, spaces, currency codes
-    final cleaned = amountString.replaceAll(RegExp(r'[KSh\s,]'), '').trim();
-    try {
-      return double.parse(cleaned);
-    } catch (e) {
-      return null;
-    }
-  }
+  // @override
+  // double? parseAmount(String amountString) {
+  //   // Remove commas, spaces, currency codes
+  //   final cleaned = amountString.replaceAll(RegExp(r'[KSh\s,]'), '').trim();
+  //   try {
+  //     return double.parse(cleaned);
+  //   } catch (e) {
+  //     return null;
+  //   }
+  // }
 
   @override
   bool containsInstitutionMarkers(String pdfText) {
     return pdfText.toUpperCase().contains('MPESA FULL STATEMENT') ||
         pdfText.toUpperCase().contains('SAFARICOM') ||
         pdfText.toUpperCase().contains('M-PESA');
-  }
-
-  @override
-  Future<bool> unlockPdf(File pdfFile, String? password) async {
-    try {
-      final doc = PdfDocument(
-          inputBytes: pdfFile.readAsBytesSync(), password: password);
-      doc.dispose();
-      return true;
-    } catch (e) {
-      return false;
-    }
   }
 
   // Unused helper for this specific implementation as we use Regex parsing
