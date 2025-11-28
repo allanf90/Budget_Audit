@@ -471,6 +471,12 @@ class BudgetingViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void startNewTemplate() {
+    _categories = [];
+    _appContext.clearCurrentTemplate();
+    notifyListeners();
+  }
+
   Future<bool> updateTemplate({
     required int templateId,
     required String templateName,

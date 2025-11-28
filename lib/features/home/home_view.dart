@@ -10,8 +10,22 @@ import 'widgets/document_ingestion_widget.dart';
 import 'widgets/extracted_transactions_widget.dart';
 import 'widgets/side_panel.dart';
 
-class HomeView extends StatelessWidget {
+class HomeView extends StatefulWidget {
   const HomeView({Key? key}) : super(key: key);
+
+  @override
+  State<HomeView> createState() => _HomeViewState();
+}
+
+class _HomeViewState extends State<HomeView> {
+  @override
+  void initState() {
+    super.initState();
+    // Refresh history data when view is initialized
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<HomeViewModel>().refreshHistory();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

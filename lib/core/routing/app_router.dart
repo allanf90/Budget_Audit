@@ -58,15 +58,16 @@ class AppRouter {
               return const OnboardingView();
             }
 
-            return ChangeNotifierProvider(
-              create: (_) => HomeViewModel(
-                documentService: sl<DocumentService>(),
-                participantService: sl<ParticipantService>(),
-                budgetService: sl<BudgetService>(),
-                appContext: Provider.of<AppContext>(context, listen: false),
-              ),
-              child: const HomeView(),
-            );
+            // return ChangeNotifierProvider(
+            //   create: (_) => HomeViewModel(
+            //     documentService: sl<DocumentService>(),
+            //     participantService: sl<ParticipantService>(),
+            //     budgetService: sl<BudgetService>(),
+            //     appContext: Provider.of<AppContext>(context, listen: false),
+            //   ),
+            //   child: const HomeView(),
+            // );
+            return const HomeView();
           },
         );
 

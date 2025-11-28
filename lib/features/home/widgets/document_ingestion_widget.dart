@@ -53,7 +53,11 @@ class _DocumentIngestionWidgetState extends State<DocumentIngestionWidget> {
                 color: AppTheme.textSecondary,
               ),
             ),
-            const SizedBox(height: AppTheme.spacingLg),
+            const SizedBox(height: AppTheme.spacingMd),
+
+            // Active Template Warning/Info
+            _buildActiveTemplateInfo(viewModel),
+            const SizedBox(height: AppTheme.spacingMd),
 
             // Browse Document
             _buildBrowseDocument(),
@@ -348,7 +352,9 @@ class _DocumentIngestionWidgetState extends State<DocumentIngestionWidget> {
         const SizedBox(width: AppTheme.spacingMd),
         Expanded(
           child: ElevatedButton.icon(
-            onPressed: viewModel.hasDocuments && !viewModel.isLoading
+            onPressed: viewModel.hasDocuments &&
+                    !viewModel.isLoading &&
+                    viewModel.hasActiveTemplate
                 ? viewModel.runAudit
                 : null,
             icon: const Icon(Icons.play_arrow, size: 20),
@@ -446,5 +452,81 @@ class _DocumentIngestionWidgetState extends State<DocumentIngestionWidget> {
         _selectedInstitution = null;
       });
     }
+  }
+
+  Widget _buildActiveTemplateInfo(HomeViewModel viewModel) {
+    if (!viewModel.hasActiveTemplate) {
+      return Container(
+        padding: const EdgeInsets.all(AppTheme.spacingMd),
+        decoration: BoxDecoration(
+          color: Colors.amber.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+          border: Border.all(color: Colors.amber),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.warning_amber_rounded, color: Colors.amber),
+            const SizedBox(width: AppTheme.spacingMd),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'No Active Budget Template',
+                    style: AppTheme.bodyMedium.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.amber[900],
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Please create a new budget or select one from history to run audit.',
+                    style: AppTheme.bodySmall.copyWith(
+                      color: Colors.amber[900],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(AppTheme.spacingMd),
+      decoration: BoxDecoration(
+        color: AppTheme.primaryBlue.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+        border: Border.all(color: AppTheme.primaryBlue),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.description, color: AppTheme.primaryBlue),
+          const SizedBox(width: AppTheme.spacingMd),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Active Budget',
+                  style: AppTheme.bodySmall.copyWith(
+                    color: AppTheme.primaryBlue,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  viewModel.currentTemplate?.templateName ?? 'Unknown Template',
+                  style: AppTheme.bodyMedium.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.primaryBlue,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

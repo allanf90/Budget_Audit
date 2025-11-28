@@ -81,7 +81,7 @@ void main() {
       expect(parser.parseAmount("2.40"), equals(2.40));
       expect(parser.parseAmount("144.00"), equals(144.00));
       expect(parser.parseAmount(""), isNull);
-    });
+    }); 
 
     test('containsInstitutionMarkers identifies HSBC documents', () {
       const hsbcText1 = "HSBC ADVANCE Your Statement";

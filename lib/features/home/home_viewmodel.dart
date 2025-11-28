@@ -53,6 +53,9 @@ class HomeViewModel extends ChangeNotifier {
   int? get currentParticipantId =>
       _appContext.currentParticipant?.participantId;
 
+  models.Template? get currentTemplate => _appContext.currentTemplate;
+  bool get hasActiveTemplate => _appContext.currentTemplate != null;
+
   Future<void> _initialize() async {
     await loadParticipants();
     await loadTemplateHistory();
@@ -76,6 +79,12 @@ class HomeViewModel extends ChangeNotifier {
     } catch (e, st) {
       _logger.severe('Error loading template history', e, st);
     }
+  }
+
+  /// Refreshes history data (participants and templates) without clearing document state
+  Future<void> refreshHistory() async {
+    await loadParticipants();
+    await loadTemplateHistory();
   }
 
   /// Adds a document to the upload queue
@@ -257,7 +266,8 @@ class HomeViewModel extends ChangeNotifier {
   }
 
   /// Fetches full details (categories and accounts) for a specific template
-  Future<List<client_models.CategoryData>> getTemplateDetails(int templateId) async {
+  Future<List<client_models.CategoryData>> getTemplateDetails(
+      int templateId) async {
     try {
       // 1. Get all categories for this template
       final categories = await _budgetService.categoryService

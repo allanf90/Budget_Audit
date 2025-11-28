@@ -33,7 +33,7 @@ class HSBCParser extends StatementParser {
       // Try to unlock the PDF first
       final canUnlock = await unlockPdf(pdfFile, password);
       if (!canUnlock) {
-        return ValidationResult(
+        return const ValidationResult(
           canParse: false,
           errorMessage: 'Unable to unlock PDF. Password may be incorrect.',
           missingCheckpoints: ['PDF unlock'],
@@ -80,7 +80,7 @@ class HSBCParser extends StatementParser {
         );
       }
 
-      return ValidationResult(
+      return const ValidationResult(
         canParse: true,
         errorMessage: null,
         missingCheckpoints: [],

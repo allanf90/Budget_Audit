@@ -352,20 +352,40 @@ class _BudgetingViewState extends State<BudgetingView> {
           const SizedBox(width: AppTheme.spacingMd),
           Expanded(
             child: currentTemplate != null
-                ? RichText(
-                    text: TextSpan(
-                      style: AppTheme.bodyMedium
-                          .copyWith(color: AppTheme.textSecondary),
-                      children: [
-                        const TextSpan(
-                            text: 'You are currently working on the "'),
-                        TextSpan(
-                          text: currentTemplate.templateName,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      RichText(
+                        text: TextSpan(
+                          style: AppTheme.bodyMedium
+                              .copyWith(color: AppTheme.textSecondary),
+                          children: [
+                            const TextSpan(
+                                text: 'You are currently working on the "'),
+                            TextSpan(
+                              text: currentTemplate.templateName,
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            const TextSpan(text: '" template.'),
+                          ],
                         ),
-                        const TextSpan(text: '" template.'),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(height: 4),
+                      InkWell(
+                        onTap: () {
+                          context.read<BudgetingViewModel>().startNewTemplate();
+                        },
+                        child: Text(
+                          'Create new budget',
+                          style: AppTheme.bodySmall.copyWith(
+                            color: AppTheme.primaryBlue,
+                            decoration: TextDecoration.underline,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
                   )
                 : Text(
                     'You don\'t have an active budget. Create a new template or import a previous one to get started.',
