@@ -6,6 +6,7 @@ import '../../core/widgets/app_header.dart';
 import '../../core/widgets/modal_box.dart';
 import '../../core/context.dart';
 import '../../core/models/models.dart' as models;
+import '../../features/menu/menu.dart';
 import 'budgeting_viewmodel.dart';
 import 'widgets/import_option_card.dart';
 import 'widgets/search_filter_bar.dart';
@@ -44,37 +45,81 @@ class _BudgetingViewState extends State<BudgetingView> {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       body: SafeArea(
-        child: Consumer<BudgetingViewModel>(
-          builder: (context, viewModel, _) {
-            if (viewModel.isLoading) {
-              return const Center(child: CircularProgressIndicator());
-            }
+        child: Stack(
+          children: [
+            Consumer<BudgetingViewModel>(
+              builder: (context, viewModel, _) {
+                if (viewModel.isLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-            return Column(
-              children: [
-                AppHeader(
-                  subtitle: 'Create and manage your budget templates',
-                ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(AppTheme.spacingLg),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildMainContainer(context, viewModel, appContext),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            );
-          },
+                return LayoutBuilder(
+                  builder: (context, constraints) {
+                    // Mobile breakpoint
+                    final isMobile = constraints.maxWidth < 800;
+
+                    if (isMobile) {
+                      // Mobile: Header scrolls away with content
+                      return SingleChildScrollView(
+                        child: Column(
+                          children: [
+                            const AppHeader(
+                              subtitle:
+                                  'Create and manage your budget templates',
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(AppTheme.spacingLg),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _buildMainContainer(
+                                      context, viewModel, appContext),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    } else {
+                      // Desktop: Header fixed at top
+                      return Column(
+                        children: [
+                          const AppHeader(
+                            subtitle: 'Create and manage your budget templates',
+                          ),
+                          Expanded(
+                            child: SingleChildScrollView(
+                              padding: const EdgeInsets.all(AppTheme.spacingLg),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _buildMainContainer(
+                                      context, viewModel, appContext),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    }
+                  },
+                );
+              },
+            ),
+            // Menu always accessible on top left
+            const Positioned(
+              top: 12, // Align with AppHeader padding
+              left: 24,
+              child: Menu(),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildMainContainer(BuildContext context, BudgetingViewModel viewModel, AppContext appContext) {
+  Widget _buildMainContainer(BuildContext context, BudgetingViewModel viewModel,
+      AppContext appContext) {
     return Container(
       padding: const EdgeInsets.all(AppTheme.spacingXl),
       decoration: BoxDecoration(
@@ -177,14 +222,17 @@ class _BudgetingViewState extends State<BudgetingView> {
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              TextButton.icon(
-                onPressed: () => _launchBudgetingGuide(),
-                icon: const Icon(Icons.help_outline, size: 16),
-                label: Text(
-                  'Learn how budgeting works in the Budget Audit',
-                  style: AppTheme.bodySmall.copyWith(
-                    color: AppTheme.primaryBlue,
-                    decoration: TextDecoration.underline,
+              Flexible(
+                child: TextButton.icon(
+                  onPressed: () => _launchBudgetingGuide(),
+                  icon: const Icon(Icons.help_outline, size: 16),
+                  label: Text(
+                    'Learn how budgeting works in the Budget Audit',
+                    style: AppTheme.bodySmall.copyWith(
+                      color: AppTheme.primaryBlue,
+                      decoration: TextDecoration.underline,
+                    ),
+                    overflow: TextOverflow.visible,
                   ),
                 ),
               ),
@@ -208,7 +256,10 @@ class _BudgetingViewState extends State<BudgetingView> {
             ...viewModel.categories.map((category) {
               return Padding(
                 padding: const EdgeInsets.only(bottom: AppTheme.spacingMd),
-                child: CategoryWidget(category: category),
+                child: CategoryWidget(
+                  key: ValueKey(category.id),
+                  category: category,
+                ),
               );
             }),
 
@@ -242,7 +293,7 @@ class _BudgetingViewState extends State<BudgetingView> {
           const SizedBox(height: AppTheme.spacing2xl),
 
           // Save/Update buttons
-          _buildActionButtons(context, viewModel),
+          _buildActionButtons(context, viewModel, appContext),
         ],
       ),
     );
@@ -292,37 +343,63 @@ class _BudgetingViewState extends State<BudgetingView> {
       child: Row(
         children: [
           Icon(
-            currentTemplate != null ? Icons.info_outline : Icons.lightbulb_outline,
+            currentTemplate != null
+                ? Icons.info_outline
+                : Icons.lightbulb_outline,
             color: AppTheme.primaryBlue,
             size: 24,
           ),
           const SizedBox(width: AppTheme.spacingMd),
           Expanded(
             child: currentTemplate != null
-                ? RichText(
-              text: TextSpan(
-                style: AppTheme.bodyMedium.copyWith(color: AppTheme.textSecondary),
-                children: [
-                  const TextSpan(text: 'You are currently working on the "'),
-                  TextSpan(
-                    text: currentTemplate.templateName,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  const TextSpan(text: '" template.'),
-                ],
-              ),
-            )
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      RichText(
+                        text: TextSpan(
+                          style: AppTheme.bodyMedium
+                              .copyWith(color: AppTheme.textSecondary),
+                          children: [
+                            const TextSpan(
+                                text: 'You are currently working on the "'),
+                            TextSpan(
+                              text: currentTemplate.templateName,
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            const TextSpan(text: '" template.'),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      InkWell(
+                        onTap: () {
+                          context.read<BudgetingViewModel>().startNewTemplate();
+                        },
+                        child: Text(
+                          'Create new budget',
+                          style: AppTheme.bodySmall.copyWith(
+                            color: AppTheme.primaryBlue,
+                            decoration: TextDecoration.underline,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
                 : Text(
-              'You don\'t have an active budget. Create a new template or import a previous one to get started.',
-              style: AppTheme.bodyMedium.copyWith(color: AppTheme.textSecondary),
-            ),
+                    'You don\'t have an active budget. Create a new template or import a previous one to get started.',
+                    style: AppTheme.bodyMedium
+                        .copyWith(color: AppTheme.textSecondary),
+                  ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildActionButtons(BuildContext context, BudgetingViewModel viewModel) {
+  Widget _buildActionButtons(BuildContext context, BudgetingViewModel viewModel,
+      AppContext appContext) {
     final validationMessage = viewModel.saveValidationMessage;
 
     return Column(
@@ -352,7 +429,6 @@ class _BudgetingViewState extends State<BudgetingView> {
               ],
             ),
           ),
-
         Row(
           children: [
             Expanded(
@@ -371,29 +447,30 @@ class _BudgetingViewState extends State<BudgetingView> {
                   ),
                 ),
                 child: Text(
-                  'Save Template',
+                  'Save As New Template',
                   style: AppTheme.button.copyWith(
                     color: viewModel.canSave
-                        ? AppTheme.primaryPink
+                        ? AppTheme.primaryBlue
                         : AppTheme.textTertiary,
                   ),
                 ),
               ),
             ),
             const SizedBox(width: AppTheme.spacingMd),
-            Expanded(
-              child: ElevatedButton(
-                onPressed: viewModel.canSave
-                    ? () => _handleUpdate(context, viewModel)
-                    : null,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: AppTheme.spacingMd,
+            if (appContext.currentTemplate != null)
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: viewModel.canSave
+                      ? () => _handleUpdate(context, viewModel)
+                      : null,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppTheme.spacingMd,
+                    ),
                   ),
+                  child: const Text('Update The Current Template'),
                 ),
-                child: const Text('Update Template'),
               ),
-            ),
           ],
         ),
       ],
@@ -423,75 +500,81 @@ class _BudgetingViewState extends State<BudgetingView> {
                   const SizedBox(height: AppTheme.spacingMd),
                   Text(
                     'Select a template to adopt or manage your previous templates',
-                    style: AppTheme.bodyMedium.copyWith(color: AppTheme.textSecondary),
+                    style: AppTheme.bodyMedium
+                        .copyWith(color: AppTheme.textSecondary),
                   ),
                   const SizedBox(height: AppTheme.spacingLg),
                   Expanded(
                     child: viewModel.templates.isEmpty
                         ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            Icons.history,
-                            size: 64,
-                            color: AppTheme.textTertiary,
-                          ),
-                          const SizedBox(height: AppTheme.spacingMd),
-                          Text(
-                            'No previous templates',
-                            style: AppTheme.h3.copyWith(
-                              color: AppTheme.textSecondary,
-                            ),
-                          ),
-                          const SizedBox(height: AppTheme.spacingXs),
-                          Text(
-                            'Your saved templates will appear here',
-                            style: AppTheme.bodyMedium.copyWith(
-                              color: AppTheme.textTertiary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                        : ListView.builder(
-                      itemCount: viewModel.templates.length,
-                      itemBuilder: (context, index) {
-                        final template = viewModel.templates[index];
-                        final isCurrent = appContext.currentTemplate?.templateId == template.templateId;
-
-                        return Padding(
-                          padding: const EdgeInsets.only(
-                            bottom: AppTheme.spacingMd,
-                          ),
-                          child: FutureBuilder<_TemplateData>(
-                            future: _getCachedTemplateData(viewModel, template.templateId),
-                            builder: (context, snapshot) {
-                              final templateData = snapshot.data;
-                              final totalBudget = templateData?.totalBudget ?? 0.0;
-                              final participants = templateData?.participants ?? [];
-
-                              return TemplateHistoryItem(
-                                template: template,
-                                participants: participants,
-                                totalBudget: totalBudget,
-                                isCurrent: isCurrent,
-                                onAdopt: () => _handleAdoptTemplate(
-                                  modalContext,
-                                  viewModel,
-                                  template,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(
+                                  Icons.history,
+                                  size: 64,
+                                  color: AppTheme.textTertiary,
                                 ),
-                                onDelete: () => _handleDeleteTemplate(
-                                  modalContext,
-                                  viewModel,
-                                  template,
+                                const SizedBox(height: AppTheme.spacingMd),
+                                Text(
+                                  'No previous templates',
+                                  style: AppTheme.h3.copyWith(
+                                    color: AppTheme.textSecondary,
+                                  ),
+                                ),
+                                const SizedBox(height: AppTheme.spacingXs),
+                                Text(
+                                  'Your saved templates will appear here',
+                                  style: AppTheme.bodyMedium.copyWith(
+                                    color: AppTheme.textTertiary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : ListView.builder(
+                            itemCount: viewModel.templates.length,
+                            itemBuilder: (context, index) {
+                              final template = viewModel.templates[index];
+                              final isCurrent =
+                                  appContext.currentTemplate?.templateId ==
+                                      template.templateId;
+
+                              return Padding(
+                                padding: const EdgeInsets.only(
+                                  bottom: AppTheme.spacingMd,
+                                ),
+                                child: FutureBuilder<_TemplateData>(
+                                  future: _getCachedTemplateData(
+                                      viewModel, template.templateId),
+                                  builder: (context, snapshot) {
+                                    final templateData = snapshot.data;
+                                    final totalBudget =
+                                        templateData?.totalBudget ?? 0.0;
+                                    final participants =
+                                        templateData?.participants ?? [];
+
+                                    return TemplateHistoryItem(
+                                      template: template,
+                                      participants: participants,
+                                      totalBudget: totalBudget,
+                                      isCurrent: isCurrent,
+                                      onAdopt: () => _handleAdoptTemplate(
+                                        modalContext,
+                                        viewModel,
+                                        template,
+                                      ),
+                                      onDelete: () => _handleDeleteTemplate(
+                                        modalContext,
+                                        viewModel,
+                                        template,
+                                      ),
+                                    );
+                                  },
                                 ),
                               );
                             },
                           ),
-                        );
-                      },
-                    ),
                   ),
                 ],
               );
@@ -504,29 +587,33 @@ class _BudgetingViewState extends State<BudgetingView> {
 
   /// Gets cached template data future to prevent recreation on rebuild
   Future<_TemplateData> _getCachedTemplateData(
-      BudgetingViewModel viewModel,
-      int templateId,
-      ) {
+    BudgetingViewModel viewModel,
+    int templateId,
+  ) {
     return _templateDataCache.putIfAbsent(
       templateId,
-          () => _loadTemplateData(viewModel, templateId),
+      () => _loadTemplateData(viewModel, templateId),
     );
   }
 
   Future<_TemplateData> _loadTemplateData(
-      BudgetingViewModel viewModel,
-      int templateId,
-      ) async {
+    BudgetingViewModel viewModel,
+    int templateId,
+  ) async {
     // Load all accounts for the template to calculate total budget
-    final accounts = await viewModel.accountService.getAllAccountsForTemplate(templateId);
-    final totalBudget = accounts.fold<double>(0.0, (sum, account) => sum + account.budgetAmount);
+    final accounts =
+        await viewModel.accountService.getAllAccountsForTemplate(templateId);
+    final totalBudget = accounts.fold<double>(
+        0.0, (sum, account) => sum + account.budgetAmount);
 
     // Get unique participants from accounts
-    final participantIds = accounts.map((a) => a.responsibleParticipantId).toSet();
+    final participantIds =
+        accounts.map((a) => a.responsibleParticipantId).toSet();
     final participants = <models.Participant>[];
 
     for (var participantId in participantIds) {
-      final participant = await viewModel.participantService.getParticipant(participantId);
+      final participant =
+          await viewModel.participantService.getParticipant(participantId);
       if (participant != null) {
         participants.add(participant);
       }
@@ -539,10 +626,10 @@ class _BudgetingViewState extends State<BudgetingView> {
   }
 
   void _handleAdoptTemplate(
-      BuildContext context,
-      BudgetingViewModel viewModel,
-      template,
-      ) {
+    BuildContext context,
+    BudgetingViewModel viewModel,
+    template,
+  ) {
     if (viewModel.hasUnsavedChanges) {
       showDialog(
         context: context,
@@ -597,13 +684,16 @@ class _BudgetingViewState extends State<BudgetingView> {
                   Navigator.of(context).pop();
                   _handleSave(context, viewModel, then: () async {
                     // After saving, adopt the template
-                    final appContext = Provider.of<AppContext>(context, listen: false);
+                    final appContext =
+                        Provider.of<AppContext>(context, listen: false);
                     final currentParticipant = appContext.currentParticipant;
                     if (currentParticipant != null) {
-                      await viewModel.adoptTemplate(template, currentParticipant.participantId);
+                      await viewModel.adoptTemplate(
+                          template, currentParticipant.participantId);
                       appContext.setCurrentTemplate(template);
                       if (context.mounted) {
-                        Navigator.of(context).pop(); // Close template history modal
+                        Navigator.of(context)
+                            .pop(); // Close template history modal
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text('Template adopted successfully!'),
@@ -621,11 +711,13 @@ class _BudgetingViewState extends State<BudgetingView> {
                 Navigator.of(context).pop();
 
                 // Get current participant
-                final appContext = Provider.of<AppContext>(context, listen: false);
+                final appContext =
+                    Provider.of<AppContext>(context, listen: false);
                 final currentParticipant = appContext.currentParticipant;
 
                 if (currentParticipant != null) {
-                  await viewModel.adoptTemplate(template, currentParticipant.participantId);
+                  await viewModel.adoptTemplate(
+                      template, currentParticipant.participantId);
                   appContext.setCurrentTemplate(template);
                   if (context.mounted) {
                     Navigator.of(context).pop(); // Close template history modal
@@ -654,10 +746,10 @@ class _BudgetingViewState extends State<BudgetingView> {
   }
 
   Future<void> _adoptTemplateDirectly(
-      BuildContext context,
-      BudgetingViewModel viewModel,
-      template,
-      ) async {
+    BuildContext context,
+    BudgetingViewModel viewModel,
+    template,
+  ) async {
     final appContext = Provider.of<AppContext>(context, listen: false);
     final currentParticipant = appContext.currentParticipant;
 
@@ -689,10 +781,10 @@ class _BudgetingViewState extends State<BudgetingView> {
   }
 
   void _handleDeleteTemplate(
-      BuildContext context,
-      BudgetingViewModel viewModel,
-      template,
-      ) {
+    BuildContext context,
+    BudgetingViewModel viewModel,
+    template,
+  ) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -728,14 +820,15 @@ class _BudgetingViewState extends State<BudgetingView> {
   }
 
   void _handleSave(
-      BuildContext context,
-      BudgetingViewModel viewModel, {
-        VoidCallback? then,
-      }) {
+    BuildContext context,
+    BudgetingViewModel viewModel, {
+    VoidCallback? then,
+  }) {
     if (!viewModel.canSave) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(viewModel.saveValidationMessage ?? 'Cannot save template'),
+          content:
+              Text(viewModel.saveValidationMessage ?? 'Cannot save template'),
           backgroundColor: AppTheme.error,
         ),
       );
@@ -786,7 +879,8 @@ class _BudgetingViewState extends State<BudgetingView> {
                 Navigator.of(context).pop();
 
                 // Get current participant from context
-                final appContext = Provider.of<AppContext>(context, listen: false);
+                final appContext =
+                    Provider.of<AppContext>(context, listen: false);
                 final currentParticipant = appContext.currentParticipant;
 
                 if (currentParticipant == null) {
@@ -819,7 +913,8 @@ class _BudgetingViewState extends State<BudgetingView> {
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text(viewModel.errorMessage ?? 'Failed to save template'),
+                        content: Text(viewModel.errorMessage ??
+                            'Failed to save template'),
                         backgroundColor: AppTheme.error,
                       ),
                     );
@@ -838,7 +933,8 @@ class _BudgetingViewState extends State<BudgetingView> {
     if (!viewModel.canSave) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(viewModel.saveValidationMessage ?? 'Cannot update template'),
+          content:
+              Text(viewModel.saveValidationMessage ?? 'Cannot update template'),
           backgroundColor: AppTheme.error,
         ),
       );
@@ -852,7 +948,8 @@ class _BudgetingViewState extends State<BudgetingView> {
     if (currentTemplate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('No active template to update. Please save as a new template first.'),
+          content: Text(
+              'No active template to update. Please save as a new template first.'),
           backgroundColor: AppTheme.warning,
         ),
       );
@@ -894,7 +991,8 @@ class _BudgetingViewState extends State<BudgetingView> {
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text(viewModel.errorMessage ?? 'Failed to update template'),
+                        content: Text(viewModel.errorMessage ??
+                            'Failed to update template'),
                         backgroundColor: AppTheme.error,
                       ),
                     );

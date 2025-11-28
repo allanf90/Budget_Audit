@@ -1,75 +1,75 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
-import '../../features/menu/menu.dart';
 
 /// Reusable header component with logo and subtitle
 /// Used across multiple screens for consistent branding
 class AppHeader extends StatelessWidget {
   final String? subtitle;
-  final double logoHeight;
+  final double? logoHeight;
   final EdgeInsets padding;
 
-  AppHeader({
+  const AppHeader({
     Key? key,
     this.subtitle,
-    this.logoHeight = 200,
-    this.padding = const EdgeInsets.symmetric(vertical: 24, horizontal: 24),
+    this.logoHeight,
+    this.padding = const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Container(
-          padding: padding,
-          child: Column(
-            children: [
-              // Logo
-              Image.asset(
-                'assets/images/logo.png',
-                height: logoHeight,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    height: logoHeight,
-                    width: logoHeight,
-                    decoration: BoxDecoration(
-                      color: AppTheme.primaryPink.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Center(
-                      child: Text(
-                        'BA',
-                        style: TextStyle(
-                          fontSize: 40,
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.primaryPink,
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 16),
+    final mediaQuery = MediaQuery.of(context);
+    final screenHeight = mediaQuery.size.height;
+    // Calculate max height (1/8th of screen)
+    final maxHeaderHeight = screenHeight / 8;
+    // Use provided logoHeight or calculate based on constraints, ensuring it's not too large
+    final effectiveLogoHeight = logoHeight ?? (maxHeaderHeight * 0.6);
 
-              if (subtitle != null) ...[
-                const SizedBox(height: 8),
-                Text(
-                  subtitle!,
-                  style: AppTheme.bodyMedium.copyWith(
-                    color: AppTheme.textSecondary,
-                  ),
-                  textAlign: TextAlign.center,
+    return Container(
+      width: double.infinity,
+      padding: padding,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Logo
+          Image.asset(
+            'assets/images/logo.png',
+            height: effectiveLogoHeight,
+            cacheHeight:
+                (effectiveLogoHeight * mediaQuery.devicePixelRatio).round(),
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                height: effectiveLogoHeight,
+                width: effectiveLogoHeight,
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryPink.withOpacity(0.1),
+                  borderRadius:
+                      BorderRadius.circular(effectiveLogoHeight * 0.2),
                 ),
-              ],
-            ],
+                child: Center(
+                  child: Text(
+                    'BA',
+                    style: TextStyle(
+                      fontSize: effectiveLogoHeight * 0.4,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.primaryPink,
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
-        ),
-        Positioned(
-          top: padding.top / 2, // Adjust position to be vertically centered in the padding area
-          left: padding.right, // Align with the left edge of the padding
-          child: const Menu(),
-        ),
-      ],
+          if (subtitle != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              subtitle!,
+              style: AppTheme.bodyMedium.copyWith(
+                color: AppTheme.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ],
+      ),
     );
   }
 }

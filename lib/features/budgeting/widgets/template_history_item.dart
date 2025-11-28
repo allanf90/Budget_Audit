@@ -38,11 +38,16 @@ class TemplateHistoryItem extends StatelessWidget {
         ),
       ],
       previewWidgets: [
-        Flexible(
-          child: Text(
-            template.templateName,
-            style: AppTheme.bodyMedium.copyWith(fontWeight: FontWeight.w600),
-            overflow: TextOverflow.ellipsis,
+        Text(
+          template.templateName,
+          style: AppTheme.bodyMedium.copyWith(fontWeight: FontWeight.w600),
+          overflow: TextOverflow.ellipsis,
+        ),
+        Text(
+          '\$${totalBudget.toStringAsFixed(2)}',
+          style: AppTheme.bodyMedium.copyWith(
+            color: AppTheme.primaryBlue,
+            fontWeight: FontWeight.w600,
           ),
         ),
         if (isCurrent)
@@ -152,27 +157,23 @@ class TemplateHistoryItem extends StatelessWidget {
   }
 
   Widget _buildInfoRow(String label, String value) {
-    return Flexible(
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            '$label: ',
-            style: AppTheme.bodySmall.copyWith(
-              color: AppTheme.textSecondary,
-            ),
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          '$label: ',
+          style: AppTheme.bodySmall.copyWith(
+            color: AppTheme.textSecondary,
           ),
-          Flexible(
-            child: Text(
-              value,
-              style: AppTheme.bodySmall.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
+        ),
+        Text(
+          value,
+          style: AppTheme.bodySmall.copyWith(
+            fontWeight: FontWeight.w600,
           ),
-        ],
-      ),
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
     );
   }
 

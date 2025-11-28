@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:logging/logging.dart';
 import '../models/models.dart' as models;
 import '../models/client_models.dart' as clientModels;
-import '../data/databases.dart';
+import '../data/database.dart';
 import 'package:drift/drift.dart' as drift;
 
 class BudgetService {
@@ -339,6 +339,7 @@ class CategoryService {
   }
 
   Future<int?> createCategory(clientModels.Category newCategory) async {
+    print("Attempting to create category. Details:\n Name: ${newCategory.categoryName} \n Template ID: ${newCategory.templateId} \n Color: ${newCategory.colorHex}");
     try {
       final entry = CategoriesCompanion.insert(
         categoryName: newCategory.categoryName,

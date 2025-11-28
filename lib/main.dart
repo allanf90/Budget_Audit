@@ -1,3 +1,5 @@
+import 'package:budget_audit/core/services/service_locator.dart';
+import 'package:budget_audit/features/home/home_viewmodel.dart';
 import 'package:budget_audit/features/menu/menu_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:googleapis/admob/v1.dart';
@@ -14,7 +16,8 @@ Future<void> main() async {
 
   final appContext = AppContext();
   await appContext.initialize();
-
+  sl.registerSingleton<AppContext>(appContext);
+  await setupServiceLocator();
 
   runApp(
     MultiProvider(
@@ -26,6 +29,9 @@ Future<void> main() async {
           create: (context) => MenuViewModel(
             Provider.of<AppContext>(context, listen: false),
           ),
+        ),
+        ChangeNotifierProvider<HomeViewModel>.value(
+          value: sl<HomeViewModel>(),
         ),
       ],
       child: BudgetAudit(appContext: appContext),
@@ -43,7 +49,7 @@ class BudgetAudit extends StatelessWidget {
     String initialRoute = '/onboarding';
 
     if (appContext.hasValidSession) {
-      initialRoute = '/budgeting';
+      initialRoute = '/home';
     }
     return MaterialApp(
       title: 'BudgetAudit',

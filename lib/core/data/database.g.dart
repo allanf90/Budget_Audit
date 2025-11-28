@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'databases.dart';
+part of 'database.dart';
 
 // ignore_for_file: type=lint
 class $ParticipantsTable extends Participants
@@ -1217,8 +1217,7 @@ class $CategoriesTable extends Categories
           additionalChecks: GeneratedColumn.checkTextLength(
               minTextLength: 1, maxTextLength: 100),
           type: DriftSqlType.string,
-          requiredDuringInsert: true,
-          defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'));
+          requiredDuringInsert: true);
   static const drift.VerificationMeta _colorHexMeta =
       const drift.VerificationMeta('colorHex');
   @override

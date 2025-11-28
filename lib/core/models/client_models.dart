@@ -1,5 +1,183 @@
 import 'package:flutter/painting.dart'; // For Color
 import './models.dart' as models;
+import 'package:equatable/equatable.dart';
+
+/// Represents a document uploaded by the user before processing
+class UploadedDocument extends Equatable {
+  final String id;
+  final String fileName;
+  final String filePath;
+  final String? password;
+  final int ownerParticipantId;
+  final FinancialInstitution institution;
+  final DateTime uploadedAt;
+
+  const UploadedDocument({
+    required this.id,
+    required this.fileName,
+    required this.filePath,
+    this.password,
+    required this.ownerParticipantId,
+    required this.institution,
+    required this.uploadedAt,
+  });
+
+  @override
+  List<Object?> get props => [
+        id,
+        fileName,
+        filePath,
+        password,
+        ownerParticipantId,
+        institution,
+        uploadedAt,
+      ];
+}
+
+/// Financial institutions supported by the app
+enum FinancialInstitution {
+  hsbc,
+  equity,
+  mpesa,
+  custom;
+
+  String get displayName {
+    switch (this) {
+      case FinancialInstitution.hsbc:
+        return 'HSBC';
+      case FinancialInstitution.equity:
+        return 'Equity';
+      case FinancialInstitution.mpesa:
+        return 'M-PESA';
+      case FinancialInstitution.custom:
+        return 'Custom';
+    }
+  }
+  String get logoPath {
+    switch (this) {
+      case FinancialInstitution.hsbc:
+        return 'assets/banks/hsbc.png';
+      case FinancialInstitution.equity:
+        return 'assets/banks/equity.png';
+      case FinancialInstitution.mpesa:
+        return 'assets/banks/mpesa.png';
+      case FinancialInstitution.custom:
+        return 'assets/banks/custom.png';
+    }
+  }
+}
+
+
+/// Represents a transaction extracted from a PDF but not yet saved to database
+class ParsedTransaction extends Equatable {
+  final String id; // Temporary ID for UI tracking
+  final DateTime date;
+  final String vendorName;
+  final double amount;
+  final String? originalDescription;
+  final String? category;
+  final String? account;
+  final String? reason;
+  final bool useMemory; // Maps to "Use Memory" checkbox
+
+  const ParsedTransaction({
+    required this.id,
+    required this.date,
+    required this.vendorName,
+    required this.amount,
+    this.originalDescription,
+    this.category,
+    this.account,
+    this.reason,
+    this.useMemory = false,
+  });
+
+  ParsedTransaction copyWith({
+    String? id,
+    DateTime? date,
+    String? vendorName,
+    double? amount,
+    String? originalDescription,
+    String? category,
+    String? account,
+    String? reason,
+    bool? useMemory,
+  }) {
+    return ParsedTransaction(
+      id: id ?? this.id,
+      date: date ?? this.date,
+      vendorName: vendorName ?? this.vendorName,
+      amount: amount ?? this.amount,
+      originalDescription: originalDescription ?? this.originalDescription,
+      category: category ?? this.category,
+      account: account ?? this.account,
+      reason: reason ?? this.reason,
+      useMemory: useMemory ?? this.useMemory,
+    );
+  }
+
+  @override
+  List<Object?> get props => [
+        id,
+        date,
+        vendorName,
+        amount,
+        category,
+        originalDescription,
+        account,
+        reason,
+        useMemory,
+      ];
+}
+
+
+
+/// Result of parsing a document
+class ParseResult extends Equatable {
+  final bool success;
+  final String? errorMessage;
+  final List<ParsedTransaction> transactions;
+  final UploadedDocument document;
+
+  const ParseResult({
+    required this.success,
+    this.errorMessage,
+    required this.transactions,
+    required this.document,
+  });
+
+  @override
+  List<Object?> get props => [success, errorMessage, transactions, document];
+}
+
+/// Validation result for document parseability
+class ValidationResult extends Equatable {
+  final bool canParse;
+  final String? errorMessage;
+  final List<String> missingCheckpoints;
+
+  const ValidationResult({
+    required this.canParse,
+    this.errorMessage,
+    this.missingCheckpoints = const [],
+  });
+
+  const ValidationResult.success()
+      : canParse = true,
+        errorMessage = null,
+        missingCheckpoints = const [];
+
+  const ValidationResult.failure({
+    required String error,
+    List<String> missing = const [],
+  })  : canParse = false,
+        errorMessage = error,
+        missingCheckpoints = missing;
+
+  @override
+  List<Object?> get props => [canParse, errorMessage, missingCheckpoints];
+}
+
 
 class Account {
   final int categoryId;
