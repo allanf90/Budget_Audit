@@ -1,122 +1,182 @@
+// lib/features/home/home_view.dart
+
+import 'package:budget_audit/features/menu/menu.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
-import '../menu/menu.dart';
+import '../../core/theme/app_theme.dart';
+import '../../core/widgets/app_header.dart';
 import 'home_viewmodel.dart';
+import 'widgets/document_ingestion_widget.dart';
+import 'widgets/extracted_transactions_widget.dart';
+import 'widgets/side_panel.dart';
 
+class HomeView extends StatefulWidget {
+  const HomeView({Key? key}) : super(key: key);
 
-class HomeView extends StatelessWidget {
-  const HomeView({super.key});
+  @override
+  State<HomeView> createState() => _HomeViewState();
+}
+
+class _HomeViewState extends State<HomeView> {
+  @override
+  void initState() {
+    super.initState();
+    // Refresh history data when view is initialized
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<HomeViewModel>().refreshHistory();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<HomeViewModel>(
-      builder: (context, viewModel, child) {
-        return Scaffold(
-          appBar: AppBar(
-            title: const Text('HOME GENERIC EXAMPLE'),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.refresh),
-                onPressed: viewModel.resetForm,
-              )
-            ],
-          ),
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
-            child: Form(
-              key: viewModel.formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Menu(),
-                  // Common widgets
-                  const Text(
-                    'Welcome to a sample feature page!',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 16),
+    final viewModel = context.watch<HomeViewModel>();
+    final mediaQuery = MediaQuery.of(context);
+    final isWideScreen = mediaQuery.size.width > 1024;
 
-                  // Example Dropdown
-                  DropdownButtonFormField<String>(
-                    value: viewModel.selectedOption,
-                    decoration: const InputDecoration(
-                      labelText: 'Select Category',
-                      border: OutlineInputBorder(),
-                    ),
-                    items: ['Food', 'Transport', 'Utilities']
-                        .map((item) =>
-                        DropdownMenuItem(value: item, child: Text(item)))
-                        .toList(),
-                    onChanged: (value) => viewModel.setOption(value),
-                    validator: (value) =>
-                    value == null ? 'Please select a category' : null,
-                  ),
+    return Scaffold(
+      backgroundColor: AppTheme.backgroundColor,
+      body: SafeArea(
+          child: Stack(children: [
+        Column(
+          children: [
+            const AppHeader(
+              subtitle: 'Document Analysis & Transaction Extraction',
+            ),
+            Expanded(
+              child: isWideScreen
+                  ? _buildWideScreenLayout(context, viewModel)
+                  : _buildNarrowScreenLayout(context, viewModel),
+            ),
+          ],
+        ),
+        const Positioned(
+          top: 12, // Align with AppHeader padding
+          left: 24,
+          child: Menu(),
+        ),
+      ])),
+    );
+  }
 
-                  const SizedBox(height: 16),
-
-                  // Example TextField
-                  TextFormField(
-                    controller: viewModel.nameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Name',
-                      border: OutlineInputBorder(),
-                    ),
-                    validator: (value) =>
-                    value == null || value.isEmpty ? 'Enter a name' : null,
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // Example Number Field
-                  TextFormField(
-                    controller: viewModel.amountController,
-                    decoration: const InputDecoration(
-                      labelText: 'Amount',
-                      border: OutlineInputBorder(),
-                    ),
-                    keyboardType: TextInputType.number,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Enter amount';
-                      }
-                      final num? val = num.tryParse(value);
-                      return val == null ? 'Invalid number' : null;
-                    },
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // Checkbox
-                  CheckboxListTile(
-                    title: const Text('Mark as urgent'),
-                    value: viewModel.isUrgent,
-                    onChanged: viewModel.toggleUrgent,
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Submit Button
-                  Center(
-                    child: ElevatedButton.icon(
-                      icon: const Icon(Icons.check),
-                      label: const Text('Submit'),
-                      onPressed: () {
-                        if (viewModel.submitForm()) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text('Form submitted successfully!')),
-                          );
-                        }
-                      },
-                    ),
-                  ),
-                ],
-              ),
+  Widget _buildWideScreenLayout(
+    BuildContext context,
+    HomeViewModel viewModel,
+  ) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Main content area
+        Expanded(
+          flex: 3,
+          child: _buildMainContent(context, viewModel),
+        ),
+        // Side panel
+        Container(
+          width: MediaQuery.of(context).size.width * 0.25,
+          decoration: BoxDecoration(
+            border: Border(
+              left: BorderSide(color: AppTheme.border, width: 1),
             ),
           ),
-        );
-      },
+          child: const SidePanel(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNarrowScreenLayout(
+    BuildContext context,
+    HomeViewModel viewModel,
+  ) {
+    return _buildMainContent(context, viewModel);
+  }
+
+  Widget _buildMainContent(
+    BuildContext context,
+    HomeViewModel viewModel,
+  ) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(AppTheme.spacingLg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Data handling notice
+          _buildDataHandlingNotice(context),
+          const SizedBox(height: AppTheme.spacingLg),
+
+          // Document ingestion
+          const DocumentIngestionWidget(),
+          const SizedBox(height: AppTheme.spacingLg),
+
+          // Extracted transactions (only shown after audit)
+          if (viewModel.hasRunAudit) ...[
+            const ExtractedTransactionsWidget(),
+          ],
+
+          // Error message
+          if (viewModel.errorMessage != null) ...[
+            const SizedBox(height: AppTheme.spacingMd),
+            _buildErrorMessage(context, viewModel.errorMessage!),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDataHandlingNotice(BuildContext context) {
+    return Row(
+      children: [
+        Icon(
+          Icons.shield_outlined,
+          color: AppTheme.success,
+          size: 20,
+        ),
+        const SizedBox(width: AppTheme.spacingXs),
+        Expanded(
+          child: RichText(
+            text: TextSpan(
+              style: AppTheme.bodySmall.copyWith(
+                color: AppTheme.textSecondary,
+              ),
+              children: [
+                const TextSpan(
+                  text: 'Your financial documents never leave your device. ',
+                ),
+                TextSpan(
+                  text: 'Learn more about Budget Audit data handling here',
+                  style: TextStyle(
+                    color: AppTheme.primaryPink,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildErrorMessage(BuildContext context, String message) {
+    return Container(
+      padding: const EdgeInsets.all(AppTheme.spacingMd),
+      decoration: BoxDecoration(
+        color: AppTheme.error.withOpacity(0.1),
+        border: Border.all(color: AppTheme.error, width: 1),
+        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.error_outline, color: AppTheme.error, size: 20),
+          const SizedBox(width: AppTheme.spacingMd),
+          Expanded(
+            child: Text(
+              message,
+              style: AppTheme.bodySmall.copyWith(color: AppTheme.error),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -1,6 +1,8 @@
 import 'package:budget_audit/core/services/budget_service.dart';
+import 'package:budget_audit/core/services/document_service.dart';
 import 'package:budget_audit/features/budgeting/budgeting_view.dart';
 import 'package:budget_audit/features/home/home_view.dart';
+import 'package:budget_audit/features/home/home_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../features/budgeting/budgeting_viewmodel.dart';
@@ -48,16 +50,25 @@ class AppRouter {
         );
 
       case '/home':
-        // TODO: Implement home page
         return MaterialPageRoute(
-          builder: (_) => ChangeNotifierProvider(
-            create: (context) => OnboardingViewModel(
-              // TODO: remember to change this to home view model. i sorry you struggled before remembering this comment :(
-              sl<ParticipantService>(),
-              Provider.of<AppContext>(context, listen: false),
-            ),
-            child: const HomeView(),
-          ),
+          builder: (context) {
+            final appContext = Provider.of<AppContext>(context, listen: false);
+
+            if (!appContext.hasValidSession) {
+              return const OnboardingView();
+            }
+
+            // return ChangeNotifierProvider(
+            //   create: (_) => HomeViewModel(
+            //     documentService: sl<DocumentService>(),
+            //     participantService: sl<ParticipantService>(),
+            //     budgetService: sl<BudgetService>(),
+            //     appContext: Provider.of<AppContext>(context, listen: false),
+            //   ),
+            //   child: const HomeView(),
+            // );
+            return const HomeView();
+          },
         );
 
       case '/dev':

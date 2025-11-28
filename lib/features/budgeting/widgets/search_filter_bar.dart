@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/models/models.dart' as models;
 import '../budgeting_viewmodel.dart';
+import '../../../core/utils/color_palette.dart';
 
 class SearchFilterBar extends StatelessWidget {
   const SearchFilterBar({Key? key}) : super(key: key);
@@ -29,9 +30,9 @@ class SearchFilterBar extends StatelessWidget {
                   prefixIcon: const Icon(Icons.search, size: 20),
                   suffixIcon: viewModel.searchQuery.isNotEmpty
                       ? IconButton(
-                    icon: const Icon(Icons.clear, size: 20),
-                    onPressed: () => viewModel.setSearchQuery(''),
-                  )
+                          icon: const Icon(Icons.clear, size: 20),
+                          onPressed: () => viewModel.setSearchQuery(''),
+                        )
                       : null,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: AppTheme.spacingMd,
@@ -69,7 +70,8 @@ class SearchFilterBar extends StatelessWidget {
               // Filter and sort options
               Row(
                 children: [
-                  const Icon(Icons.filter_list, size: 20, color: AppTheme.textSecondary),
+                  const Icon(Icons.filter_list,
+                      size: 20, color: AppTheme.textSecondary),
                   const SizedBox(width: AppTheme.spacingXs),
                   Expanded(
                     child: SingleChildScrollView(
@@ -83,21 +85,19 @@ class SearchFilterBar extends StatelessWidget {
                             viewModel: viewModel,
                           ),
                           const SizedBox(width: AppTheme.spacingXs),
-
                           _buildSortButton(
                             context,
-                            label: 'Order by Total Budget (A-Z)',
+                            label: viewModel.sortOrder == SortOrder.asc
+                                ? 'Order by Total Budget (Low-High)'
+                                : 'Order by Total Budget (High-Low)',
                             filterType: FilterType.totalBudget,
                             viewModel: viewModel,
                           ),
                           const SizedBox(width: AppTheme.spacingXs),
-
                           _buildParticipantFilter(context, viewModel),
                           const SizedBox(width: AppTheme.spacingXs),
-
                           _buildColorFilter(context, viewModel),
                           const SizedBox(width: AppTheme.spacingXs),
-
                           _buildFilterChip(
                             context,
                             label: 'Filter by Category Editor',
@@ -119,12 +119,12 @@ class SearchFilterBar extends StatelessWidget {
   }
 
   Widget _buildFilterChip(
-      BuildContext context, {
-        required String label,
-        required IconData icon,
-        required bool isActive,
-        required VoidCallback onTap,
-      }) {
+    BuildContext context, {
+    required String label,
+    required IconData icon,
+    required bool isActive,
+    required VoidCallback onTap,
+  }) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppTheme.radiusSm),
@@ -134,7 +134,9 @@ class SearchFilterBar extends StatelessWidget {
           vertical: AppTheme.spacingXs,
         ),
         decoration: BoxDecoration(
-          color: isActive ? AppTheme.primaryPink.withOpacity(0.1) : Colors.transparent,
+          color: isActive
+              ? AppTheme.primaryPink.withOpacity(0.1)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(AppTheme.radiusSm),
           border: Border.all(
             color: isActive ? AppTheme.primaryPink : AppTheme.border,
@@ -163,11 +165,11 @@ class SearchFilterBar extends StatelessWidget {
   }
 
   Widget _buildSortButton(
-      BuildContext context, {
-        required String label,
-        required FilterType filterType,
-        required BudgetingViewModel viewModel,
-      }) {
+    BuildContext context, {
+    required String label,
+    required FilterType filterType,
+    required BudgetingViewModel viewModel,
+  }) {
     final isActive = viewModel.currentFilter == filterType;
 
     return InkWell(
@@ -185,7 +187,9 @@ class SearchFilterBar extends StatelessWidget {
           vertical: AppTheme.spacingXs,
         ),
         decoration: BoxDecoration(
-          color: isActive ? AppTheme.primaryPink.withOpacity(0.1) : Colors.transparent,
+          color: isActive
+              ? AppTheme.primaryPink.withOpacity(0.1)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(AppTheme.radiusSm),
           border: Border.all(
             color: isActive ? AppTheme.primaryPink : AppTheme.border,
@@ -217,7 +221,8 @@ class SearchFilterBar extends StatelessWidget {
     );
   }
 
-  Widget _buildParticipantFilter(BuildContext context, BudgetingViewModel viewModel) {
+  Widget _buildParticipantFilter(
+      BuildContext context, BudgetingViewModel viewModel) {
     final hasFilter = viewModel.filterParticipant != null;
 
     return PopupMenuButton<models.Participant?>(
@@ -231,7 +236,9 @@ class SearchFilterBar extends StatelessWidget {
           vertical: AppTheme.spacingXs,
         ),
         decoration: BoxDecoration(
-          color: hasFilter ? AppTheme.primaryPink.withOpacity(0.1) : Colors.transparent,
+          color: hasFilter
+              ? AppTheme.primaryPink.withOpacity(0.1)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(AppTheme.radiusSm),
           border: Border.all(
             color: hasFilter ? AppTheme.primaryPink : AppTheme.border,
@@ -250,7 +257,8 @@ class SearchFilterBar extends StatelessWidget {
             Text(
               viewModel.filterParticipant?.nickname ?? 'Filter by Participant',
               style: AppTheme.bodySmall.copyWith(
-                color: hasFilter ? AppTheme.primaryPink : AppTheme.textSecondary,
+                color:
+                    hasFilter ? AppTheme.primaryPink : AppTheme.textSecondary,
               ),
             ),
             const SizedBox(width: AppTheme.spacing2xs),
@@ -272,7 +280,8 @@ class SearchFilterBar extends StatelessWidget {
           return PopupMenuItem<models.Participant?>(
             value: participant,
             child: Text(
-              participant.nickname ?? '${participant.firstName} ${participant.lastName}',
+              participant.nickname ??
+                  '${participant.firstName} ${participant.lastName}',
             ),
           );
         }),
@@ -284,10 +293,8 @@ class SearchFilterBar extends StatelessWidget {
   }
 
   Widget _buildColorFilter(BuildContext context, BudgetingViewModel viewModel) {
-    final categoryColors = viewModel.categories
-        .map((c) => c.color)
-        .toSet()
-        .toList();
+    final categoryColors =
+        viewModel.categories.map((c) => c.color).toSet().toList();
 
     final hasFilter = viewModel.filterColor != null;
 
@@ -312,7 +319,9 @@ class SearchFilterBar extends StatelessWidget {
           vertical: AppTheme.spacingXs,
         ),
         decoration: BoxDecoration(
-          color: hasFilter ? AppTheme.primaryPink.withOpacity(0.1) : Colors.transparent,
+          color: hasFilter
+              ? AppTheme.primaryPink.withOpacity(0.1)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(AppTheme.radiusSm),
           border: Border.all(
             color: hasFilter ? AppTheme.primaryPink : AppTheme.border,
@@ -342,7 +351,8 @@ class SearchFilterBar extends StatelessWidget {
             Text(
               'Filter by Color',
               style: AppTheme.bodySmall.copyWith(
-                color: hasFilter ? AppTheme.primaryPink : AppTheme.textSecondary,
+                color:
+                    hasFilter ? AppTheme.primaryPink : AppTheme.textSecondary,
               ),
             ),
             const SizedBox(width: AppTheme.spacing2xs),
@@ -375,7 +385,7 @@ class SearchFilterBar extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: AppTheme.spacingXs),
-                Text('Color'),
+                Text(ColorPalette.getName(color)),
               ],
             ),
           );
