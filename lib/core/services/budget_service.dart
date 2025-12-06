@@ -5,7 +5,7 @@ import '../models/models.dart' as models;
 import '../models/client_models.dart' as clientModels;
 import '../data/database.dart';
 import 'package:drift/drift.dart' as drift;
-import 'transaction_service.dart';
+// import 'transaction_service.dart';
 
 class BudgetService {
   final TemplateService _templateService;
@@ -25,7 +25,6 @@ class BudgetService {
   TransactionService get transactionService => _transactionService;
 }
 
-//! IM sorry but transaction servies is in another file, check services/transaction_service.dart. Feel free to refactor
 
 class TemplateService {
   final AppDatabase _appDatabase;
@@ -381,6 +380,180 @@ class CategoryService {
     } catch (e, st) {
       _logger.severe("Error deleting category $categoryId", e, st);
       return false;
+    }
+  }
+}
+
+class TransactionService {
+  final AppDatabase _appDatabase;
+  final Logger _logger = Logger("TransactionService");
+
+  TransactionService(this._appDatabase);
+
+  /// Fetch all known vendors
+  Future<List<models.Vendor>> getAllVendors() async {
+    try {
+      final vendors = await _appDatabase.select(_appDatabase.vendors).get();
+      return vendors
+          .map((v) => models.Vendor(
+                vendorId: v.vendorId,
+                vendorName: v.vendorName,
+              ))
+          .toList();
+    } catch (e, st) {
+      _logger.severe("Error fetching vendors", e, st);
+      return [];
+    }
+  }
+
+  /// Fetch match history for a specific vendor
+  Future<List<VendorMatchHistory>> getVendorMatchHistory(int vendorId) async {
+    try {
+      final query = _appDatabase.select(_appDatabase.vendorMatchHistories)
+        ..where((tbl) => tbl.vendorId.equals(vendorId))
+        ..orderBy([
+          (t) => drift.OrderingTerm(
+              expression: t.lastUsed, mode: drift.OrderingMode.desc),
+        ]);
+
+      return await query.get();
+    } catch (e, st) {
+      _logger.severe(
+          "Error fetching match history for vendor $vendorId", e, st);
+      return [];
+    }
+  }
+
+  /// Deletes a vendor match history entry
+  Future<bool> deleteVendorMatchHistory({
+    required int vendorId,
+    required int accountId,
+    required int participantId,
+  }) async {
+    try {
+      final deleted =
+          await (_appDatabase.delete(_appDatabase.vendorMatchHistories)
+                ..where((t) =>
+                    t.vendorId.equals(vendorId) &
+                    t.accountId.equals(accountId) &
+                    t.participantId.equals(participantId)))
+              .go();
+
+      return deleted > 0;
+    } catch (e) {
+      _logger.severe('Error deleting vendor match history', e);
+      return false;
+    }
+  }
+
+  /// Record a vendor match (create or update stats)
+  Future<void> recordVendorMatch({
+    required int vendorId,
+    required int accountId,
+    required int participantId,
+  }) async {
+    try {
+      // Check if exists
+      final existing =
+          await (_appDatabase.select(_appDatabase.vendorMatchHistories)
+                ..where((tbl) =>
+                    tbl.vendorId.equals(vendorId) &
+                    tbl.accountId.equals(accountId) &
+                    tbl.participantId.equals(participantId)))
+              .getSingleOrNull();
+
+      if (existing != null) {
+        // Update
+        await (_appDatabase.update(_appDatabase.vendorMatchHistories)
+              ..where(
+                  (tbl) => tbl.vendorMatchId.equals(existing.vendorMatchId)))
+            .write(VendorMatchHistoriesCompanion(
+          useCount: drift.Value(existing.useCount + 1),
+          lastUsed: drift.Value(DateTime.now()),
+        ));
+      } else {
+        // Insert
+        await _appDatabase.into(_appDatabase.vendorMatchHistories).insert(
+              VendorMatchHistoriesCompanion.insert(
+                vendorId: vendorId,
+                accountId: accountId,
+                participantId: participantId,
+                lastUsed: DateTime.now(),
+                useCount: const drift.Value(1),
+              ),
+            );
+      }
+    } catch (e, st) {
+      _logger.severe("Error recording vendor match", e, st);
+    }
+  }
+
+  
+/// Create a new transaction in the database
+  Future<int?> createTransaction({
+    required int syncId,
+    required int accountId,
+    required DateTime date,
+    required int vendorId,
+    required double amount,
+    required int participantId,
+    required int editorParticipantId,
+    String? reason,
+    bool isIgnored = false,
+  }) async {
+    try {
+      final transactionId =
+          await _appDatabase.into(_appDatabase.transactions).insert(
+                TransactionsCompanion.insert(
+                  syncId: syncId,
+                  accountId: accountId,
+                  date: date,
+                  vendorId: vendorId,
+                  amount: amount,
+                  participantId: participantId,
+                  editorParticipantId: editorParticipantId,
+                  reason: drift.Value(reason),
+                  isIgnored: drift.Value(isIgnored),
+                ),
+              );
+
+      _logger.info(
+          'Transaction created: ID=$transactionId, vendor=$vendorId, amount=$amount');
+      return transactionId;
+    } catch (e, st) {
+      _logger.severe('Error creating transaction', e, st);
+      return null;
+    }
+  }
+
+  /// Get or create a sync log entry for batch operations
+  Future<int> getOrCreateSyncLog() async {
+    throw UnimplementedError("Synclog date not implemented  ");
+    // try {
+    //   final syncId = await _appDatabase.into(_appDatabase.syncLog).insert(
+         // TODO: add date to synclog in db
+    //         SyncLogCompanion.insert(
+    //           syncDate: DateTime.now(),
+    //           // Add other required fields based on your SyncLog table structure
+    //         ),
+    //       );
+    //   return syncId;
+    // } catch (e, st) {
+    //   _logger.severe('Error creating sync log', e, st);
+    //   rethrow;
+    // }
+  }
+
+  /// Create a new vendor
+  Future<int?> createVendor(String name) async {
+    try {
+      final id = await _appDatabase.into(_appDatabase.vendors).insert(
+            VendorsCompanion.insert(vendorName: name),
+          );
+      return id;
+    } catch (e, st) {
+      _logger.severe("Error creating vendor $name", e, st);
+      return null;
     }
   }
 }

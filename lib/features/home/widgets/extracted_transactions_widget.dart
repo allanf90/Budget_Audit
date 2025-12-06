@@ -56,15 +56,20 @@ class _ExtractedTransactionsWidgetState
       return const Center(child: CircularProgressIndicator());
     }
 
+    final currentGroup = viewModel.currentDocumentGroup;
+    if (currentGroup == null) {
+      return const SizedBox.shrink();
+    }
+
     return ContentBox(
       initiallyMinimized: false,
       previewWidgets: [
         Text(
-          'File Owner: ${viewModel.uploadedDocuments.firstOrNull?.ownerParticipantId ?? "Unknown"}',
+          'Document ${viewModel.currentDocumentIndex + 1} of ${viewModel.totalDocuments}',
           style: AppTheme.bodySmall,
         ),
         Text(
-          'Files: ${viewModel.uploadedDocuments.length}',
+          '${currentGroup.transactions.length} transactions',
           style: AppTheme.bodySmall,
         ),
       ],
@@ -72,10 +77,18 @@ class _ExtractedTransactionsWidgetState
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Document metadata
+            _buildDocumentMetadata(currentGroup),
+            const SizedBox(height: 16),
+
+            // Navigation controls
+            _buildNavigationControls(viewModel),
+            const SizedBox(height: 16),
+
             const Text('Verify extracted details', style: AppTheme.h3),
             const SizedBox(height: 8),
             Text(
-              'Found ${viewModel.extractedTransactions.length} transactions',
+              'Found ${currentGroup.transactions.length} transactions',
               style: AppTheme.bodySmall.copyWith(color: AppTheme.textSecondary),
             ),
           ],
@@ -95,21 +108,300 @@ class _ExtractedTransactionsWidgetState
           action: ContentBoxAction.minimize,
         ),
       ],
-      content: _buildTransactionGroups(context, viewModel),
+      content: Column(
+        children: [
+          _buildTransactionGroups(
+              context, viewModel, currentGroup.transactions),
+          const SizedBox(height: 24),
+          _buildActionButtons(context, viewModel),
+        ],
+      ),
     );
   }
 
-  Widget _buildTransactionGroups(
-      BuildContext context, HomeViewModel viewModel) {
-    // Group transactions by their ORIGINAL status (preserve position)
+  Widget _buildDocumentMetadata(DocumentTransactionGroup group) {
+    final viewModel = context.watch<HomeViewModel>();
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppTheme.surface,
+        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+        border: Border.all(color: AppTheme.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.description, size: 20, color: AppTheme.primaryBlue),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  group.document.fileName,
+                  style:
+                      AppTheme.bodyMedium.copyWith(fontWeight: FontWeight.w600),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              if (group.isComplete || group.hasAllAccountsAssigned)
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppTheme.success.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(color: AppTheme.success),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.check_circle,
+                          size: 14, color: AppTheme.success),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Complete',
+                        style:
+                            AppTheme.caption.copyWith(color: AppTheme.success),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: Wrap(
+                  spacing: 24,
+                  runSpacing: 8,
+                  children: [
+                    _buildMetadataItem(
+                      icon: Icons.person,
+                      label: 'Owner',
+                      value: 'Participant ${group.document.ownerParticipantId}',
+                    ),
+                    _buildMetadataItem(
+                      icon: Icons.account_balance,
+                      label: 'Institution',
+                      value: group.document.institution.displayName,
+                    ),
+                    _buildMetadataItem(
+                      icon: Icons.receipt_long,
+                      label: 'Transactions',
+                      value: '${group.transactions.length}',
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16),
+              // Auto-update toggle
+              InkWell(
+                onTap: viewModel.toggleAutoUpdateVendorAssociations,
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: viewModel.autoUpdateVendorAssociations
+                        ? AppTheme.primaryPink.withOpacity(0.1)
+                        : AppTheme.border.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: viewModel.autoUpdateVendorAssociations
+                          ? AppTheme.primaryPink
+                          : AppTheme.border,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        viewModel.autoUpdateVendorAssociations
+                            ? Icons.auto_fix_high
+                            : Icons.auto_fix_off,
+                        size: 16,
+                        color: viewModel.autoUpdateVendorAssociations
+                            ? AppTheme.primaryPink
+                            : AppTheme.textSecondary,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Auto-update\nVendors',
+                        textAlign: TextAlign.center,
+                        style: AppTheme.caption.copyWith(
+                          fontSize: 10,
+                          color: viewModel.autoUpdateVendorAssociations
+                              ? AppTheme.primaryPink
+                              : AppTheme.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMetadataItem({
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 16, color: AppTheme.textSecondary),
+        const SizedBox(width: 6),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label,
+                style:
+                    AppTheme.caption.copyWith(color: AppTheme.textSecondary)),
+            Text(value,
+                style:
+                    AppTheme.bodySmall.copyWith(fontWeight: FontWeight.w600)),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNavigationControls(HomeViewModel viewModel) {
+    return Row(
+      children: [
+        // Previous button
+        IconButton(
+          onPressed:
+              viewModel.canGoToPrevious ? viewModel.goToPreviousDocument : null,
+          icon: const Icon(Icons.arrow_back),
+          color: AppTheme.primaryBlue,
+          disabledColor: AppTheme.textSecondary.withOpacity(0.3),
+          tooltip: 'Previous document',
+        ),
+        const SizedBox(width: 8),
+
+        // Document indicator
+        Expanded(
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            decoration: BoxDecoration(
+              color: AppTheme.surface,
+              borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+              border: Border.all(color: AppTheme.border),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Document ${viewModel.currentDocumentIndex + 1} of ${viewModel.totalDocuments}',
+                  style:
+                      AppTheme.bodyMedium.copyWith(fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(width: 8),
+                // Progress dots
+                ...List.generate(
+                  viewModel.totalDocuments,
+                  (index) => Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 2),
+                    child: Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: index == viewModel.currentDocumentIndex
+                            ? AppTheme.primaryBlue
+                            : index < viewModel.currentDocumentIndex
+                                ? AppTheme.success
+                                : AppTheme.border,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        const SizedBox(width: 8),
+        // Next button
+        IconButton(
+          onPressed:
+              viewModel.canProceedToNext ? viewModel.goToNextDocument : null,
+          icon: const Icon(Icons.arrow_forward),
+          color: AppTheme.primaryBlue,
+          disabledColor: AppTheme.textSecondary.withOpacity(0.3),
+          tooltip: viewModel.isCurrentDocumentComplete
+              ? 'Next document'
+              : 'Complete all transactions first',
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionButtons(BuildContext context, HomeViewModel viewModel) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        // Progress indicator
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${viewModel.documentGroups.where((g) => g.isComplete).length} of ${viewModel.totalDocuments} documents completed',
+                style:
+                    AppTheme.bodySmall.copyWith(color: AppTheme.textSecondary),
+              ),
+              const SizedBox(height: 8),
+              LinearProgressIndicator(
+                value: viewModel.totalDocuments > 0
+                    ? viewModel.documentGroups
+                            .where((g) => g.isComplete)
+                            .length /
+                        viewModel.totalDocuments
+                    : 0,
+                backgroundColor: AppTheme.border,
+                valueColor: AlwaysStoppedAnimation<Color>(AppTheme.success),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 24),
+
+        // Complete Audit button
+        ElevatedButton.icon(
+          onPressed: viewModel.areAllDocumentsComplete
+              ? () => _completeAudit(context, viewModel)
+              : null,
+          icon: const Icon(Icons.check_circle),
+          label: const Text('Complete Audit'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppTheme.success,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            disabledBackgroundColor: AppTheme.border,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTransactionGroups(BuildContext context, HomeViewModel viewModel,
+      List<ParsedTransaction> transactions) {
+    // Group transactions by their ORIGINAL status
     final criticalTxns = <ParsedTransaction>[];
     final potentialTxns = <ParsedTransaction>[];
     final ambiguousTxns = <ParsedTransaction>[];
     final confidentTxns = <ParsedTransaction>[];
 
-    for (final txn in viewModel.extractedTransactions) {
-      // Use originalStatus to determine group placement
-      // This keeps transactions in their original group even after modification
+    for (final txn in transactions) {
       switch (txn.originalStatus ?? txn.matchStatus) {
         case MatchStatus.critical:
           criticalTxns.add(txn);
@@ -128,7 +420,6 @@ class _ExtractedTransactionsWidgetState
 
     return Column(
       children: [
-        // Critical transactions
         if (criticalTxns.isNotEmpty)
           _buildStatusGroup(
             context: context,
@@ -139,8 +430,6 @@ class _ExtractedTransactionsWidgetState
             color: AppTheme.error,
           ),
         if (criticalTxns.isNotEmpty) const SizedBox(height: 16),
-
-        // Potential transactions
         if (potentialTxns.isNotEmpty)
           _buildStatusGroup(
             context: context,
@@ -151,8 +440,6 @@ class _ExtractedTransactionsWidgetState
             color: Colors.orange,
           ),
         if (potentialTxns.isNotEmpty) const SizedBox(height: 16),
-
-        // Ambiguous transactions
         if (ambiguousTxns.isNotEmpty)
           _buildStatusGroup(
             context: context,
@@ -163,8 +450,6 @@ class _ExtractedTransactionsWidgetState
             color: const Color(0xFF86EFAC),
           ),
         if (ambiguousTxns.isNotEmpty) const SizedBox(height: 16),
-
-        // Confident transactions
         if (confidentTxns.isNotEmpty)
           _buildStatusGroup(
             context: context,
@@ -186,7 +471,6 @@ class _ExtractedTransactionsWidgetState
     required String title,
     required Color color,
   }) {
-    // Count transactions that haven't been modified (still need action)
     final unmodifiedCount = transactions
         .where((txn) =>
             txn.suggestedAccount == null ||
@@ -195,6 +479,16 @@ class _ExtractedTransactionsWidgetState
 
     return ContentBox(
       initiallyMinimized: false,
+      headerWidgets: [
+        Text(
+          'Total: ${transactions.length} transactions',
+          style: AppTheme.bodySmall.copyWith(color: AppTheme.textSecondary),
+        ),
+        Text(
+          '$unmodifiedCount ${unmodifiedCount == 1 ? 'transaction' : 'transactions remaining'}',
+          style: AppTheme.bodySmall.copyWith(color: AppTheme.textSecondary),
+        ),
+      ],
       previewWidgets: [
         Row(
           children: [
@@ -229,8 +523,7 @@ class _ExtractedTransactionsWidgetState
         children: [
           for (int i = 0; i < transactions.length; i++) ...[
             _TransactionContentBox(
-              key:
-                  ValueKey(transactions[i].id), // Important for widget identity
+              key: ValueKey(transactions[i].id),
               transaction: transactions[i],
               categories: _categories,
               originalStatus: status,
@@ -250,13 +543,67 @@ class _ExtractedTransactionsWidgetState
     );
   }
 
+  Future<void> _completeAudit(
+      BuildContext context, HomeViewModel viewModel) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Complete Audit'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+                'You are about to save all transactions to the database.'),
+            const SizedBox(height: 16),
+            Text(
+              'Total: ${viewModel.documentGroups.fold(0, (sum, group) => sum + group.transactions.length)} transactions',
+              style: AppTheme.bodyMedium.copyWith(fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Documents: ${viewModel.totalDocuments}',
+              style: AppTheme.bodySmall.copyWith(color: AppTheme.textSecondary),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.success),
+            child: const Text('Save All'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      final success = await viewModel.completeAudit();
+      if (mounted && success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Audit completed successfully!'),
+            backgroundColor: AppTheme.success,
+          ),
+        );
+        // Optionally reset or navigate away
+        viewModel.reset();
+      }
+    }
+  }
+
   Future<void> _confirmDelete(
       BuildContext context, HomeViewModel viewModel) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Clear Transactions'),
-        content: const Text('This will remove all extracted transactions.'),
+        content: const Text(
+            'This will remove all extracted transactions for this document.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -277,6 +624,7 @@ class _ExtractedTransactionsWidgetState
   }
 }
 
+// Keep the same _TransactionContentBox implementation from before
 class _TransactionContentBox extends StatelessWidget {
   final ParsedTransaction transaction;
   final List<CategoryData> categories;
@@ -309,13 +657,11 @@ class _TransactionContentBox extends StatelessWidget {
   }
 
   Color _getCurrentColor() {
-    // Priority: user modified > auto updated > original status
     if (transaction.userModified) {
-      return AppTheme.success; // Full green for manual updates
+      return AppTheme.success;
     } else if (transaction.autoUpdated) {
-      return const Color(0xFFBBF7D0); // Pale green for auto-updates
+      return const Color(0xFFBBF7D0);
     }
-    // Show original status color if not modified
     return _getStatusColor(originalStatus);
   }
 
@@ -327,7 +673,6 @@ class _TransactionContentBox extends StatelessWidget {
       initiallyMinimized: true,
       expandContent: true,
       previewWidgets: [
-        // Status indicator + Vendor name
         Row(
           children: [
             Container(
@@ -347,7 +692,6 @@ class _TransactionContentBox extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            // Show indicator for auto-updated transactions
             if (transaction.autoUpdated && !transaction.userModified)
               Padding(
                 padding: const EdgeInsets.only(left: 8.0),
@@ -359,7 +703,6 @@ class _TransactionContentBox extends StatelessWidget {
               ),
           ],
         ),
-        // Amount
         Text(
           '${transaction.amount < 0 ? '-' : '+'}${transaction.amount.abs().toStringAsFixed(2)}',
           style: AppTheme.bodyMedium.copyWith(
@@ -367,19 +710,70 @@ class _TransactionContentBox extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
         ),
-        // Account selector
         EnhancedAccountSelector(
           categories: categories,
           selectedAccountId: transaction.suggestedAccount?.id,
           vendorId: transaction.vendorId,
-          onAccountSelected: (account) {
+          onAccountSelected: (account) async {
+            final viewModel = context.read<HomeViewModel>();
+
+            // Check if we should prompt for vendor-wide update
+            // Allow prompt if vendorId IS present OR vendorName is present (relaxed)
+            final shouldPrompt = viewModel.autoUpdateVendorAssociations &&
+                !transaction.userModified;
+
+            if (shouldPrompt) {
+              // Count other transactions with same vendor
+              final sameVendorCount = viewModel.documentGroups
+                  .expand((g) => g.transactions)
+                  .where((t) {
+                // Must not be self
+                if (t.id == transaction.id) return false;
+                // Must not be already modified
+                if (t.userModified) return false;
+
+                // Match by ID if both have it
+                if (t.vendorId != null && transaction.vendorId != null) {
+                  return t.vendorId == transaction.vendorId;
+                }
+                // Fallback to name match
+                return t.vendorName.toLowerCase().trim() ==
+                    transaction.vendorName.toLowerCase().trim();
+              }).length;
+
+              if (sameVendorCount > 0) {
+                final result = await _showVendorUpdateDialog(
+                  context,
+                  transaction.vendorName,
+                  account.name,
+                  sameVendorCount,
+                  viewModel.toggleAutoUpdateVendorAssociations,
+                );
+
+                if (result == true) {
+                  // Update with propagation
+                  viewModel.updateTransaction(
+                    transaction.copyWith(
+                      account: account.name,
+                      suggestedAccount: account,
+                      matchStatus: MatchStatus.confident,
+                      userModified: true,
+                      autoUpdated: false,
+                    ),
+                    propagateToOthers: true,
+                  );
+                  return;
+                }
+              }
+            }
+
+            // Standard update without propagation
             onUpdate(transaction.copyWith(
               account: account.name,
               suggestedAccount: account,
               matchStatus: MatchStatus.confident,
               userModified: true,
-              autoUpdated:
-                  false, // Clear auto-update flag when manually changed
+              autoUpdated: false,
             ));
           },
           onDeleteRecommendation: onDeleteRecommendation,
@@ -433,7 +827,6 @@ class _TransactionContentBox extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Vendor name
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -481,15 +874,57 @@ class _TransactionContentBox extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 16),
-
-        // Account selector
         const Text('Account', style: AppTheme.caption),
         const SizedBox(height: 8),
         EnhancedAccountSelector(
           categories: categories,
           selectedAccountId: transaction.suggestedAccount?.id,
           vendorId: transaction.vendorId,
-          onAccountSelected: (account) {
+          onAccountSelected: (account) async {
+            final viewModel = context.read<HomeViewModel>();
+
+            // Check if we should prompt for vendor-wide update
+            final shouldPrompt = viewModel.autoUpdateVendorAssociations &&
+                transaction.vendorId != null &&
+                !transaction.userModified;
+
+            if (shouldPrompt) {
+              // Count other transactions with same vendor
+              final sameVendorCount = viewModel.documentGroups
+                  .expand((g) => g.transactions)
+                  .where((t) =>
+                      t.id != transaction.id &&
+                      t.vendorId == transaction.vendorId &&
+                      !t.userModified)
+                  .length;
+
+              if (sameVendorCount > 0) {
+                final result = await _showVendorUpdateDialog(
+                  context,
+                  transaction.vendorName,
+                  account.name,
+                  sameVendorCount,
+                  viewModel.toggleAutoUpdateVendorAssociations,
+                );
+
+                if (result == true) {
+                  // Update with propagation
+                  viewModel.updateTransaction(
+                    transaction.copyWith(
+                      account: account.name,
+                      suggestedAccount: account,
+                      matchStatus: MatchStatus.confident,
+                      userModified: true,
+                      autoUpdated: false,
+                    ),
+                    propagateToOthers: true,
+                  );
+                  return;
+                }
+              }
+            }
+
+            // Standard update without propagation
             onUpdate(transaction.copyWith(
               account: account.name,
               suggestedAccount: account,
@@ -501,8 +936,6 @@ class _TransactionContentBox extends StatelessWidget {
           onDeleteRecommendation: onDeleteRecommendation,
         ),
         const SizedBox(height: 16),
-
-        // Actions row
         Row(
           children: [
             ElevatedButton.icon(
@@ -551,6 +984,7 @@ class _TransactionContentBox extends StatelessWidget {
   }
 }
 
+// Keep the same _SplitTransactionDialog from before
 class _SplitTransactionDialog extends StatefulWidget {
   final ParsedTransaction transaction;
   final List<CategoryData> categories;
@@ -679,4 +1113,144 @@ class _SplitTransactionDialogState extends State<_SplitTransactionDialog> {
       ],
     );
   }
+}
+
+/// Shows a dialog asking if user wants to update all transactions with same vendor
+Future<bool?> _showVendorUpdateDialog(
+  BuildContext context,
+  String vendorName,
+  String accountName,
+  int affectedCount,
+  Function() onDisableAutoUpdate,
+) {
+  bool dontAskAgain = false;
+
+  return showDialog<bool>(
+    context: context,
+    builder: (context) => StatefulBuilder(builder: (context, setState) {
+      return AlertDialog(
+        title: Row(
+          children: [
+            Icon(Icons.auto_fix_high, color: AppTheme.primaryPink),
+            const SizedBox(width: 8),
+            const Text('Update All Vendors?'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            RichText(
+              text: TextSpan(
+                style:
+                    AppTheme.bodyMedium.copyWith(color: AppTheme.textPrimary),
+                children: [
+                  const TextSpan(text: 'You\'ve assigned '),
+                  TextSpan(
+                    text: '"$vendorName"',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const TextSpan(text: ' to '),
+                  TextSpan(
+                    text: '"$accountName"',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.primaryPink,
+                    ),
+                  ),
+                  const TextSpan(text: '.'),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppTheme.primaryPink.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border:
+                    Border.all(color: AppTheme.primaryPink.withOpacity(0.3)),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    size: 20,
+                    color: AppTheme.primaryPink,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Found $affectedCount other ${affectedCount == 1 ? 'transaction' : 'transactions'} '
+                      'with "$vendorName" that haven\'t been labeled yet.',
+                      style: AppTheme.bodySmall,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Would you like to update all of them to this account?',
+              style: AppTheme.bodyMedium,
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: Checkbox(
+                    value: dontAskAgain,
+                    onChanged: (value) {
+                      setState(() {
+                        dontAskAgain = value ?? false;
+                      });
+                    },
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        dontAskAgain = !dontAskAgain;
+                      });
+                    },
+                    child: const Text('Don\'t ask me again for other vendors',
+                        style: AppTheme.bodySmall),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              if (dontAskAgain) {
+                onDisableAutoUpdate();
+              }
+              Navigator.pop(context, false);
+            },
+            child: const Text('Just This One'),
+          ),
+          ElevatedButton.icon(
+            onPressed: () {
+              if (dontAskAgain) {
+                onDisableAutoUpdate();
+              }
+              Navigator.pop(context, true);
+            },
+            icon: const Icon(Icons.done_all, size: 18),
+            label: Text('Update All ($affectedCount)'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primaryPink,
+              foregroundColor: Colors.white,
+            ),
+          ),
+        ],
+      );
+    }),
+  );
 }

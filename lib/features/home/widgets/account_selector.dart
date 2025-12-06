@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:budget_audit/core/models/client_models.dart';
 
-class EnhancedAccountSelector extends StatelessWidget {
+class EnhancedAccountSelector extends StatefulWidget {
   final List<CategoryData> categories;
   final String? selectedAccountId;
   final ValueChanged<AccountData> onAccountSelected;
@@ -18,9 +18,29 @@ class EnhancedAccountSelector extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    // Flatten accounts with category names
-    final allAccounts = categories.expand((category) {
+  State<EnhancedAccountSelector> createState() =>
+      _EnhancedAccountSelectorState();
+}
+
+class _EnhancedAccountSelectorState extends State<EnhancedAccountSelector> {
+  late List<_AccountOption> _allAccounts;
+
+  @override
+  void initState() {
+    super.initState();
+    _buildAccountOptions();
+  }
+
+  @override
+  void didUpdateWidget(EnhancedAccountSelector oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.categories != widget.categories) {
+      _buildAccountOptions();
+    }
+  }
+
+  void _buildAccountOptions() {
+    _allAccounts = widget.categories.expand((category) {
       return category.accounts.map((account) {
         return _AccountOption(
           account: account,
@@ -30,34 +50,43 @@ class EnhancedAccountSelector extends StatelessWidget {
       });
     }).toList();
 
-    // Sort alphabetically by Category - Account
-    allAccounts.sort((a, b) => '${a.categoryName} - ${a.account.name}'
+    _allAccounts.sort((a, b) => '${a.categoryName} - ${a.account.name}'
         .compareTo('${b.categoryName} - ${b.account.name}'));
+  }
 
+  String _getDisplayStringForOption(_AccountOption option) =>
+      option.account.name;
+
+  String _getInitialValue() {
+    if (widget.selectedAccountId != null) {
+      final match = _allAccounts
+          .where((a) => a.account.id == widget.selectedAccountId)
+          .firstOrNull;
+      return match?.account.name ?? '';
+    }
+    return '';
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
+      // Key is crucial to force rebuild when selection changes from outside
       return Autocomplete<_AccountOption>(
-        displayStringForOption: (option) => option.account.name,
-        initialValue: TextEditingValue(
-          text: selectedAccountId != null
-              ? allAccounts
-                  .firstWhere((a) => a.account.id == selectedAccountId,
-                      orElse: () => allAccounts.first)
-                  .account
-                  .name
-              : '',
-        ),
+        key: ValueKey(widget.selectedAccountId),
+        displayStringForOption: _getDisplayStringForOption,
+        initialValue: TextEditingValue(text: _getInitialValue()),
         optionsBuilder: (TextEditingValue textEditingValue) {
           if (textEditingValue.text == '') {
             return const Iterable<_AccountOption>.empty();
           }
-          return allAccounts.where((option) {
+          return _allAccounts.where((option) {
             final searchString =
                 '${option.categoryName} - ${option.account.name}'.toLowerCase();
             return searchString.contains(textEditingValue.text.toLowerCase());
           });
         },
         onSelected: (option) {
-          onAccountSelected(option.account);
+          widget.onAccountSelected(option.account);
         },
         fieldViewBuilder:
             (context, textEditingController, focusNode, onFieldSubmitted) {
