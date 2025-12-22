@@ -1,3 +1,4 @@
+import 'package:budget_audit/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
 /// Defines the available control actions for a ContentBox
@@ -372,10 +373,10 @@ class _ContentBoxState extends State<ContentBox>
                 )
               : null,
           decoration: BoxDecoration(
-            color: const Color(0xFFFFFFFF),
+            color: context.colors.surface,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: const Color(0xFFC7C7C7),
+              color: context.colors.border,
               width: 1,
             ),
           ),

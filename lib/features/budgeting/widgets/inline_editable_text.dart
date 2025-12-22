@@ -14,6 +14,8 @@ class InlineEditableText extends StatefulWidget {
   final String? prefixText;
   final String? hintText;
   final TextAlign textAlign;
+  final bool selectAllOnFocus;
+  final TextEditingController? controller;
 
   const InlineEditableText({
     Key? key,
@@ -28,6 +30,8 @@ class InlineEditableText extends StatefulWidget {
     this.prefixText,
     this.hintText,
     this.textAlign = TextAlign.start,
+    this.selectAllOnFocus = false,
+    this.controller,
   }) : super(key: key);
 
   @override
@@ -38,11 +42,17 @@ class _InlineEditableTextState extends State<InlineEditableText> {
   late TextEditingController _controller;
   late FocusNode _focusNode;
   bool _isInternalFocusNode = false;
+  bool _isInternalController = false;
 
   @override
   void initState() {
     super.initState();
-    _controller = TextEditingController(text: widget.text);
+    if (widget.controller != null) {
+      _controller = widget.controller!;
+    } else {
+      _controller = TextEditingController(text: widget.text);
+      _isInternalController = true;
+    }
 
     if (widget.focusNode != null) {
       _focusNode = widget.focusNode!;
@@ -69,6 +79,7 @@ class _InlineEditableTextState extends State<InlineEditableText> {
     if (widget.text != oldWidget.text && widget.text != _controller.text) {
       _controller.text = widget.text;
     }
+    // Handle controller change if needed (rare but possible)
   }
 
   @override
@@ -77,12 +88,21 @@ class _InlineEditableTextState extends State<InlineEditableText> {
     if (_isInternalFocusNode) {
       _focusNode.dispose();
     }
-    _controller.dispose();
+    if (_isInternalController) {
+      _controller.dispose();
+    }
     super.dispose();
   }
 
   void _handleFocusChange() {
-    if (!_focusNode.hasFocus) {
+    if (_focusNode.hasFocus) {
+      if (widget.selectAllOnFocus) {
+        _controller.selection = TextSelection(
+          baseOffset: 0,
+          extentOffset: _controller.text.length,
+        );
+      }
+    } else {
       // Save on blur
       _submit();
     }
@@ -113,19 +133,19 @@ class _InlineEditableTextState extends State<InlineEditableText> {
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppTheme.radiusXs),
-          borderSide: const BorderSide(color: AppTheme.border, width: 1),
+          borderSide:  BorderSide(color: context.colors.border, width: 1),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppTheme.radiusXs),
-          borderSide: const BorderSide(color: AppTheme.border, width: 1),
+          borderSide:  BorderSide(color: context.colors.border, width: 1),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppTheme.radiusXs),
-          borderSide: const BorderSide(color: AppTheme.primaryPink, width: 1),
+          borderSide:  BorderSide(color: context.colors.primary, width: 1),
         ),
         prefixText: widget.prefixText,
         hintText: widget.hintText,
-        fillColor: Colors.white,
+        fillColor: context.colors.surface,
         filled: true,
       ),
       inputFormatters: widget.inputFormatters,

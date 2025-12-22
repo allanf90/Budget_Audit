@@ -95,7 +95,7 @@ class Accounts extends drift.Table {
       real().withDefault(const drift.Constant(0.00)).nullable()();
 
   drift.IntColumn get responsibleParticipantId =>
-      integer().references(Participants, #participantId)();
+      integer().references(Participants, #participantId).nullable()();
 
   drift.DateTimeColumn get dateCreated => dateTime()();
 
@@ -286,7 +286,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration {
@@ -370,6 +370,20 @@ class AppDatabase extends _$AppDatabase {
               await m.createTable(vendorMatchHistories);
               print(
                   "Replaced TransactionEditHistories with VendorMatchHistories.");
+              break;
+
+            case 7: // Migrating from v7 to v8
+              await m.alterTable(
+                TableMigration(
+                  accounts,
+                  columnTransformer: {
+                    accounts.responsibleParticipantId:
+                        accounts.responsibleParticipantId,
+                  },
+                ),
+              );
+              print(
+                  "Migrated Accounts: responsibleParticipantId is now nullable.");
               break;
           }
         }

@@ -25,7 +25,6 @@ class BudgetService {
   TransactionService get transactionService => _transactionService;
 }
 
-
 class TemplateService {
   final AppDatabase _appDatabase;
   final Logger _logger = Logger("TemplateService");
@@ -141,7 +140,8 @@ class AccountService {
                 colorHex: a.colorHex,
                 budgetAmount: a.budgetAmount,
                 expenditureTotal: a.expenditureTotal ?? 0.0,
-                responsibleParticipantId: a.responsibleParticipantId,
+                responsibleParticipantId:
+                    a.responsibleParticipantId, // Now nullable
                 dateCreated: a.dateCreated,
               ))
           .toList();
@@ -170,7 +170,8 @@ class AccountService {
                 colorHex: a.colorHex,
                 budgetAmount: a.budgetAmount,
                 expenditureTotal: a.expenditureTotal ?? 0.0,
-                responsibleParticipantId: a.responsibleParticipantId,
+                responsibleParticipantId:
+                    a.responsibleParticipantId, // Now nullable
                 dateCreated: a.dateCreated,
               ))
           .toList();
@@ -196,7 +197,8 @@ class AccountService {
                 colorHex: a.colorHex,
                 budgetAmount: a.budgetAmount,
                 expenditureTotal: a.expenditureTotal ?? 0.0,
-                responsibleParticipantId: a.responsibleParticipantId,
+                responsibleParticipantId:
+                    a.responsibleParticipantId, // Now nullable
                 dateCreated: a.dateCreated,
               ))
           .toList();
@@ -251,7 +253,8 @@ class AccountService {
         colorHex: newAccount.colorHex,
         budgetAmount: newAccount.budgetAmount,
         expenditureTotal: drift.Value(newAccount.expenditureTotal ?? 0.0),
-        responsibleParticipantId: newAccount.responsibleParticipantId,
+        responsibleParticipantId:
+            drift.Value(newAccount.responsibleParticipantId), // Now nullable
         dateCreated: newAccount.dateCreated ?? DateTime.now(),
       );
 
@@ -488,8 +491,7 @@ class TransactionService {
     }
   }
 
-  
-/// Create a new transaction in the database
+  /// Create a new transaction in the database
   Future<int?> createTransaction({
     required int syncId,
     required int accountId,
@@ -531,17 +533,17 @@ class TransactionService {
     //throw UnimplementedError("Synclog date not implemented  ");
     try {
       final syncId = await _appDatabase.into(_appDatabase.syncLog).insert(
-         // TODO: add date to synclog in db
-        SyncLogCompanion.insert(
-          dateSynced: DateTime.now(),
-          syncDirection: models.SyncDirection.upload.value,
-          synced: false,
-          success: false,
-          sheetUrl: "",
-          
-          // Add other required fields based on your SyncLog table structure
-        ),
-      );
+            // TODO: add date to synclog in db
+            SyncLogCompanion.insert(
+              dateSynced: DateTime.now(),
+              syncDirection: models.SyncDirection.upload.value,
+              synced: false,
+              success: false,
+              sheetUrl: "",
+
+              // Add other required fields based on your SyncLog table structure
+            ),
+          );
       return syncId;
     } catch (e, st) {
       _logger.severe('Error creating sync log', e, st);

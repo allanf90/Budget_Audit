@@ -43,7 +43,8 @@ class _BudgetingViewState extends State<BudgetingView> {
     final appContext = Provider.of<AppContext>(context);
 
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
+      backgroundColor:
+          Colors.transparent, // Transparent to show global gradient
       body: SafeArea(
         child: Stack(
           children: [
@@ -123,7 +124,7 @@ class _BudgetingViewState extends State<BudgetingView> {
     return Container(
       padding: const EdgeInsets.all(AppTheme.spacingXl),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.colors.background,
         borderRadius: BorderRadius.circular(AppTheme.radiusXl),
         boxShadow: [
           BoxShadow(
@@ -149,7 +150,7 @@ class _BudgetingViewState extends State<BudgetingView> {
                 height: 3,
                 width: 200,
                 decoration: BoxDecoration(
-                  color: AppTheme.primaryPink,
+                  color: context.colors.primary,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -229,7 +230,7 @@ class _BudgetingViewState extends State<BudgetingView> {
                   label: Text(
                     'Learn how budgeting works in the Budget Audit',
                     style: AppTheme.bodySmall.copyWith(
-                      color: AppTheme.primaryBlue,
+                      color: context.colors.secondary,
                       decoration: TextDecoration.underline,
                     ),
                     overflow: TextOverflow.visible,
@@ -269,21 +270,18 @@ class _BudgetingViewState extends State<BudgetingView> {
           InkWell(
             onTap: () => viewModel.addCategory(),
             borderRadius: BorderRadius.circular(8),
-            child: const Row(
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Icon(
-                  Icons.add_box_outlined,
-                  size: 22,
-                  color: AppTheme.primaryPink,
-                ),
-                SizedBox(width: 6),
+                Icon(Icons.add_box_outlined,
+                    size: 22, color: context.colors.primary),
+                const SizedBox(width: 6),
                 Text(
                   "Add Category",
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
-                    color: AppTheme.primaryPink,
+                    color: context.colors.primary,
                   ),
                 ),
               ],
@@ -303,26 +301,26 @@ class _BudgetingViewState extends State<BudgetingView> {
     return Container(
       padding: const EdgeInsets.all(AppTheme.spacing2xl),
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(AppTheme.radiusLg),
-        border: Border.all(color: AppTheme.border),
+        border: Border.all(color: context.colors.border),
       ),
       child: Column(
         children: [
-          const Icon(
+          Icon(
             Icons.category_outlined,
             size: 64,
-            color: AppTheme.textTertiary,
+            color: context.colors.textTertiary,
           ),
           const SizedBox(height: AppTheme.spacingMd),
           Text(
             'No categories yet',
-            style: AppTheme.h3.copyWith(color: AppTheme.textSecondary),
+            style: AppTheme.h3.copyWith(color: context.colors.textSecondary),
           ),
           const SizedBox(height: AppTheme.spacingXs),
           Text(
             'Add your first category to start building your budget',
-            style: AppTheme.bodyMedium.copyWith(color: AppTheme.textTertiary),
+            style: AppTheme.bodyMedium.copyWith(color: context.colors.textTertiary),
             textAlign: TextAlign.center,
           ),
         ],
@@ -336,9 +334,9 @@ class _BudgetingViewState extends State<BudgetingView> {
     return Container(
       padding: const EdgeInsets.all(AppTheme.spacingMd),
       decoration: BoxDecoration(
-        color: AppTheme.primaryBlue.withOpacity(0.05),
+        color: context.colors.secondary.withOpacity(0.05),
         borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-        border: Border.all(color: AppTheme.primaryBlue.withOpacity(0.2)),
+        border: Border.all(color: context.colors.secondary.withOpacity(0.2)),
       ),
       child: Row(
         children: [
@@ -346,7 +344,7 @@ class _BudgetingViewState extends State<BudgetingView> {
             currentTemplate != null
                 ? Icons.info_outline
                 : Icons.lightbulb_outline,
-            color: AppTheme.primaryBlue,
+            color: context.colors.secondary,
             size: 24,
           ),
           const SizedBox(width: AppTheme.spacingMd),
@@ -358,7 +356,7 @@ class _BudgetingViewState extends State<BudgetingView> {
                       RichText(
                         text: TextSpan(
                           style: AppTheme.bodyMedium
-                              .copyWith(color: AppTheme.textSecondary),
+                              .copyWith(color: context.colors.textSecondary),
                           children: [
                             const TextSpan(
                                 text: 'You are currently working on the "'),
@@ -379,7 +377,7 @@ class _BudgetingViewState extends State<BudgetingView> {
                         child: Text(
                           'Create new budget',
                           style: AppTheme.bodySmall.copyWith(
-                            color: AppTheme.primaryBlue,
+                            color: context.colors.secondary,
                             decoration: TextDecoration.underline,
                             fontWeight: FontWeight.w600,
                           ),
@@ -390,7 +388,7 @@ class _BudgetingViewState extends State<BudgetingView> {
                 : Text(
                     'You don\'t have an active budget. Create a new template or import a previous one to get started.',
                     style: AppTheme.bodyMedium
-                        .copyWith(color: AppTheme.textSecondary),
+                        .copyWith(color: context.colors.textSecondary),
                   ),
           ),
         ],
@@ -410,19 +408,19 @@ class _BudgetingViewState extends State<BudgetingView> {
             margin: const EdgeInsets.only(bottom: AppTheme.spacingMd),
             padding: const EdgeInsets.all(AppTheme.spacingMd),
             decoration: BoxDecoration(
-              color: AppTheme.warning.withOpacity(0.1),
+              color: context.colors.warning.withOpacity(0.1),
               borderRadius: BorderRadius.circular(AppTheme.radiusSm),
-              border: Border.all(color: AppTheme.warning),
+              border: Border.all(color: context.colors.warning),
             ),
             child: Row(
               children: [
-                const Icon(Icons.warning_amber, color: AppTheme.warning),
+                Icon(Icons.warning_amber, color: context.colors.warning),
                 const SizedBox(width: AppTheme.spacingSm),
                 Expanded(
                   child: Text(
                     validationMessage,
                     style: AppTheme.bodyMedium.copyWith(
-                      color: AppTheme.warning,
+                      color: context.colors.warning,
                     ),
                   ),
                 ),
@@ -442,16 +440,16 @@ class _BudgetingViewState extends State<BudgetingView> {
                   ),
                   side: BorderSide(
                     color: viewModel.canSave
-                        ? AppTheme.primaryBlue
-                        : AppTheme.border,
+                        ? context.colors.textSecondary
+                        : context.colors.border,
                   ),
                 ),
                 child: Text(
                   'Save As New Template',
                   style: AppTheme.button.copyWith(
                     color: viewModel.canSave
-                        ? AppTheme.primaryBlue
-                        : AppTheme.textTertiary,
+                        ? context.colors.textSecondary
+                        : context.colors.textTertiary,
                   ),
                 ),
               ),
@@ -501,7 +499,7 @@ class _BudgetingViewState extends State<BudgetingView> {
                   Text(
                     'Select a template to adopt or manage your previous templates',
                     style: AppTheme.bodyMedium
-                        .copyWith(color: AppTheme.textSecondary),
+                        .copyWith(color: context.colors.textSecondary),
                   ),
                   const SizedBox(height: AppTheme.spacingLg),
                   Expanded(
@@ -510,23 +508,23 @@ class _BudgetingViewState extends State<BudgetingView> {
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Icon(
+                                Icon(
                                   Icons.history,
                                   size: 64,
-                                  color: AppTheme.textTertiary,
+                                  color: context.colors.textTertiary,
                                 ),
                                 const SizedBox(height: AppTheme.spacingMd),
                                 Text(
                                   'No previous templates',
                                   style: AppTheme.h3.copyWith(
-                                    color: AppTheme.textSecondary,
+                                    color: context.colors.textSecondary,
                                   ),
                                 ),
                                 const SizedBox(height: AppTheme.spacingXs),
                                 Text(
                                   'Your saved templates will appear here',
                                   style: AppTheme.bodyMedium.copyWith(
-                                    color: AppTheme.textTertiary,
+                                    color: context.colors.textTertiary,
                                   ),
                                 ),
                               ],
@@ -613,7 +611,7 @@ class _BudgetingViewState extends State<BudgetingView> {
 
     for (var participantId in participantIds) {
       final participant =
-          await viewModel.participantService.getParticipant(participantId);
+          await viewModel.participantService.getParticipant(participantId!);
       if (participant != null) {
         participants.add(participant);
       }
@@ -645,23 +643,23 @@ class _BudgetingViewState extends State<BudgetingView> {
                 Container(
                   padding: const EdgeInsets.all(AppTheme.spacingXs),
                   decoration: BoxDecoration(
-                    color: AppTheme.warning.withOpacity(0.1),
+                    color: context.colors.warning.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(AppTheme.radiusXs),
-                    border: Border.all(color: AppTheme.warning),
+                    border: Border.all(color: context.colors.warning),
                   ),
                   child: Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.warning_amber,
                         size: 16,
-                        color: AppTheme.warning,
+                        color: context.colors.warning,
                       ),
                       const SizedBox(width: AppTheme.spacingXs),
                       Expanded(
                         child: Text(
                           'Note: ${viewModel.saveValidationMessage}',
                           style: AppTheme.bodySmall.copyWith(
-                            color: AppTheme.warning,
+                            color: context.colors.warning,
                           ),
                         ),
                       ),
@@ -695,9 +693,9 @@ class _BudgetingViewState extends State<BudgetingView> {
                         Navigator.of(context)
                             .pop(); // Close template history modal
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Template adopted successfully!'),
-                            backgroundColor: AppTheme.success,
+                          SnackBar(
+                            content: const Text('Template adopted successfully!'),
+                            backgroundColor: context.colors.success,
                           ),
                         );
                       }
@@ -723,16 +721,16 @@ class _BudgetingViewState extends State<BudgetingView> {
                     Navigator.of(context).pop(); // Close template history modal
 
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Template adopted successfully!'),
-                        backgroundColor: AppTheme.success,
+                      SnackBar(
+                        content: const Text('Template adopted successfully!'),
+                        backgroundColor: context.colors.success,
                       ),
                     );
                   }
                 }
               },
               style: TextButton.styleFrom(
-                foregroundColor: AppTheme.error,
+                foregroundColor: context.colors.error,
               ),
               child: const Text('Discard & Adopt'),
             ),
@@ -756,9 +754,9 @@ class _BudgetingViewState extends State<BudgetingView> {
     if (currentParticipant == null) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('No participant logged in'),
-            backgroundColor: AppTheme.error,
+          SnackBar(
+            content: const Text('No participant logged in'),
+            backgroundColor: context.colors.error,
           ),
         );
       }
@@ -772,9 +770,9 @@ class _BudgetingViewState extends State<BudgetingView> {
       Navigator.of(context).pop(); // Close template history modal
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Template adopted successfully!'),
-          backgroundColor: AppTheme.success,
+        SnackBar(
+          content: const Text('Template adopted successfully!'),
+          backgroundColor: context.colors.success,
         ),
       );
     }
@@ -810,7 +808,7 @@ class _BudgetingViewState extends State<BudgetingView> {
               }
             },
             style: TextButton.styleFrom(
-              foregroundColor: AppTheme.error,
+              foregroundColor: context.colors.error,
             ),
             child: const Text('Delete'),
           ),
@@ -829,7 +827,7 @@ class _BudgetingViewState extends State<BudgetingView> {
         SnackBar(
           content:
               Text(viewModel.saveValidationMessage ?? 'Cannot save template'),
-          backgroundColor: AppTheme.error,
+          backgroundColor: context.colors.error,
         ),
       );
       return;
@@ -868,9 +866,9 @@ class _BudgetingViewState extends State<BudgetingView> {
               onPressed: () async {
                 if (controller.text.trim().isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Please enter a template name'),
-                      backgroundColor: AppTheme.error,
+                    SnackBar(
+                      content: const Text('Please enter a template name'),
+                      backgroundColor: context.colors.error,
                     ),
                   );
                   return;
@@ -886,9 +884,9 @@ class _BudgetingViewState extends State<BudgetingView> {
                 if (currentParticipant == null) {
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('No participant logged in'),
-                        backgroundColor: AppTheme.error,
+                      SnackBar(
+                        content: const Text('No participant logged in'),
+                        backgroundColor: context.colors.error,
                       ),
                     );
                   }
@@ -904,9 +902,9 @@ class _BudgetingViewState extends State<BudgetingView> {
                 if (context.mounted) {
                   if (success) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Template saved successfully!'),
-                        backgroundColor: AppTheme.success,
+                       SnackBar(
+                        content:const Text('Template saved successfully!'),
+                        backgroundColor: context.colors.success,
                       ),
                     );
                     then?.call();
@@ -915,7 +913,7 @@ class _BudgetingViewState extends State<BudgetingView> {
                       SnackBar(
                         content: Text(viewModel.errorMessage ??
                             'Failed to save template'),
-                        backgroundColor: AppTheme.error,
+                        backgroundColor: context.colors.error,
                       ),
                     );
                   }
@@ -935,7 +933,7 @@ class _BudgetingViewState extends State<BudgetingView> {
         SnackBar(
           content:
               Text(viewModel.saveValidationMessage ?? 'Cannot update template'),
-          backgroundColor: AppTheme.error,
+          backgroundColor: context.colors.error,
         ),
       );
       return;
@@ -947,10 +945,10 @@ class _BudgetingViewState extends State<BudgetingView> {
 
     if (currentTemplate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
+        SnackBar(
+          content: const Text(
               'No active template to update. Please save as a new template first.'),
-          backgroundColor: AppTheme.warning,
+          backgroundColor: context.colors.warning,
         ),
       );
       return;
@@ -983,9 +981,9 @@ class _BudgetingViewState extends State<BudgetingView> {
                 if (context.mounted) {
                   if (success) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Template updated successfully!'),
-                        backgroundColor: AppTheme.success,
+                       SnackBar(
+                        content: const Text('Template updated successfully!'),
+                        backgroundColor: context.colors.success,
                       ),
                     );
                   } else {
@@ -993,14 +991,14 @@ class _BudgetingViewState extends State<BudgetingView> {
                       SnackBar(
                         content: Text(viewModel.errorMessage ??
                             'Failed to update template'),
-                        backgroundColor: AppTheme.error,
+                        backgroundColor: context.colors.error,
                       ),
                     );
                   }
                 }
               },
               style: TextButton.styleFrom(
-                foregroundColor: AppTheme.primaryPink,
+                foregroundColor: context.colors.primary,
               ),
               child: const Text('Update'),
             ),

@@ -89,7 +89,8 @@ class _ExtractedTransactionsWidgetState
             const SizedBox(height: 8),
             Text(
               'Found ${currentGroup.transactions.length} transactions',
-              style: AppTheme.bodySmall.copyWith(color: AppTheme.textSecondary),
+              style: AppTheme.bodySmall
+                  .copyWith(color: context.colors.textSecondary),
             ),
           ],
         ),
@@ -125,16 +126,17 @@ class _ExtractedTransactionsWidgetState
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-        border: Border.all(color: AppTheme.border),
+        border: Border.all(color: context.colors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.description, size: 20, color: AppTheme.primaryBlue),
+              Icon(Icons.description,
+                  size: 20, color: context.colors.secondary),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -149,20 +151,20 @@ class _ExtractedTransactionsWidgetState
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppTheme.success.withOpacity(0.1),
+                    color: context.colors.success.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(4),
-                    border: Border.all(color: AppTheme.success),
+                    border: Border.all(color: context.colors.success),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(Icons.check_circle,
-                          size: 14, color: AppTheme.success),
+                          size: 14, color: context.colors.success),
                       const SizedBox(width: 4),
                       Text(
                         'Complete',
-                        style:
-                            AppTheme.caption.copyWith(color: AppTheme.success),
+                        style: AppTheme.caption
+                            .copyWith(color: context.colors.success),
                       ),
                     ],
                   ),
@@ -205,13 +207,13 @@ class _ExtractedTransactionsWidgetState
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
                     color: viewModel.autoUpdateVendorAssociations
-                        ? AppTheme.primaryPink.withOpacity(0.1)
-                        : AppTheme.border.withOpacity(0.3),
+                        ? context.colors.primary.withOpacity(0.1)
+                        : context.colors.border.withOpacity(0.3),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                       color: viewModel.autoUpdateVendorAssociations
-                          ? AppTheme.primaryPink
-                          : AppTheme.border,
+                          ? context.colors.primary
+                          : context.colors.border,
                     ),
                   ),
                   child: Row(
@@ -223,8 +225,8 @@ class _ExtractedTransactionsWidgetState
                             : Icons.auto_fix_off,
                         size: 16,
                         color: viewModel.autoUpdateVendorAssociations
-                            ? AppTheme.primaryPink
-                            : AppTheme.textSecondary,
+                            ? context.colors.primary
+                            : context.colors.textSecondary,
                       ),
                       const SizedBox(width: 6),
                       Text(
@@ -233,8 +235,8 @@ class _ExtractedTransactionsWidgetState
                         style: AppTheme.caption.copyWith(
                           fontSize: 10,
                           color: viewModel.autoUpdateVendorAssociations
-                              ? AppTheme.primaryPink
-                              : AppTheme.textSecondary,
+                              ? context.colors.primary
+                              : context.colors.textSecondary,
                         ),
                       ),
                     ],
@@ -256,14 +258,14 @@ class _ExtractedTransactionsWidgetState
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 16, color: AppTheme.textSecondary),
+        Icon(icon, size: 16, color: context.colors.textSecondary),
         const SizedBox(width: 6),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(label,
-                style:
-                    AppTheme.caption.copyWith(color: AppTheme.textSecondary)),
+                style: AppTheme.caption
+                    .copyWith(color: context.colors.textSecondary)),
             Text(value,
                 style:
                     AppTheme.bodySmall.copyWith(fontWeight: FontWeight.w600)),
@@ -281,8 +283,8 @@ class _ExtractedTransactionsWidgetState
           onPressed:
               viewModel.canGoToPrevious ? viewModel.goToPreviousDocument : null,
           icon: const Icon(Icons.arrow_back),
-          color: AppTheme.primaryBlue,
-          disabledColor: AppTheme.textSecondary.withOpacity(0.3),
+          color: context.colors.secondary,
+          disabledColor: context.colors.textSecondary.withOpacity(0.3),
           tooltip: 'Previous document',
         ),
         const SizedBox(width: 8),
@@ -292,9 +294,9 @@ class _ExtractedTransactionsWidgetState
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
             decoration: BoxDecoration(
-              color: AppTheme.surface,
+              color: context.colors.surface,
               borderRadius: BorderRadius.circular(AppTheme.radiusSm),
-              border: Border.all(color: AppTheme.border),
+              border: Border.all(color: context.colors.border),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -316,10 +318,10 @@ class _ExtractedTransactionsWidgetState
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: index == viewModel.currentDocumentIndex
-                            ? AppTheme.primaryBlue
+                            ? context.colors.secondary
                             : index < viewModel.currentDocumentIndex
-                                ? AppTheme.success
-                                : AppTheme.border,
+                                ? context.colors.success
+                                : context.colors.border,
                       ),
                     ),
                   ),
@@ -335,8 +337,8 @@ class _ExtractedTransactionsWidgetState
           onPressed:
               viewModel.canProceedToNext ? viewModel.goToNextDocument : null,
           icon: const Icon(Icons.arrow_forward),
-          color: AppTheme.primaryBlue,
-          disabledColor: AppTheme.textSecondary.withOpacity(0.3),
+          color: context.colors.secondary,
+          disabledColor: context.colors.textSecondary.withOpacity(0.3),
           tooltip: viewModel.isCurrentDocumentComplete
               ? 'Next document'
               : 'Complete all transactions first',
@@ -356,8 +358,8 @@ class _ExtractedTransactionsWidgetState
             children: [
               Text(
                 '${viewModel.documentGroups.where((g) => g.isComplete).length} of ${viewModel.totalDocuments} documents completed',
-                style:
-                    AppTheme.bodySmall.copyWith(color: AppTheme.textSecondary),
+                style: AppTheme.bodySmall
+                    .copyWith(color: context.colors.textSecondary),
               ),
               const SizedBox(height: 8),
               LinearProgressIndicator(
@@ -367,8 +369,9 @@ class _ExtractedTransactionsWidgetState
                             .length /
                         viewModel.totalDocuments
                     : 0,
-                backgroundColor: AppTheme.border,
-                valueColor: AlwaysStoppedAnimation<Color>(AppTheme.success),
+                backgroundColor: context.colors.border,
+                valueColor:
+                    AlwaysStoppedAnimation<Color>(context.colors.success),
               ),
             ],
           ),
@@ -383,10 +386,10 @@ class _ExtractedTransactionsWidgetState
           icon: const Icon(Icons.check_circle),
           label: const Text('Complete Audit'),
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppTheme.success,
+            backgroundColor: context.colors.success,
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-            disabledBackgroundColor: AppTheme.border,
+            disabledBackgroundColor: context.colors.border,
           ),
         ),
       ],
@@ -427,7 +430,7 @@ class _ExtractedTransactionsWidgetState
             transactions: criticalTxns,
             status: MatchStatus.critical,
             title: 'Your Input is Required',
-            color: AppTheme.error,
+            color: context.colors.error,
           ),
         if (criticalTxns.isNotEmpty) const SizedBox(height: 16),
         if (potentialTxns.isNotEmpty)
@@ -457,7 +460,7 @@ class _ExtractedTransactionsWidgetState
             transactions: confidentTxns,
             status: MatchStatus.confident,
             title: 'Verified transactions',
-            color: AppTheme.success,
+            color: context.colors.success,
           ),
       ],
     );
@@ -482,11 +485,13 @@ class _ExtractedTransactionsWidgetState
       headerWidgets: [
         Text(
           'Total: ${transactions.length} transactions',
-          style: AppTheme.bodySmall.copyWith(color: AppTheme.textSecondary),
+          style:
+              AppTheme.bodySmall.copyWith(color: context.colors.textSecondary),
         ),
         Text(
           '$unmodifiedCount ${unmodifiedCount == 1 ? 'transaction' : 'transactions remaining'}',
-          style: AppTheme.bodySmall.copyWith(color: AppTheme.textSecondary),
+          style:
+              AppTheme.bodySmall.copyWith(color: context.colors.textSecondary),
         ),
       ],
       previewWidgets: [
@@ -512,7 +517,8 @@ class _ExtractedTransactionsWidgetState
         ),
         Text(
           '$unmodifiedCount ${unmodifiedCount == 1 ? 'transaction' : 'transactions'}',
-          style: AppTheme.bodySmall.copyWith(color: AppTheme.textSecondary),
+          style:
+              AppTheme.bodySmall.copyWith(color: context.colors.textSecondary),
         ),
       ],
       controls: const [
@@ -563,7 +569,8 @@ class _ExtractedTransactionsWidgetState
             const SizedBox(height: 8),
             Text(
               'Documents: ${viewModel.totalDocuments}',
-              style: AppTheme.bodySmall.copyWith(color: AppTheme.textSecondary),
+              style: AppTheme.bodySmall
+                  .copyWith(color: context.colors.textSecondary),
             ),
           ],
         ),
@@ -574,7 +581,8 @@ class _ExtractedTransactionsWidgetState
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.success),
+            style: ElevatedButton.styleFrom(
+                backgroundColor: context.colors.success),
             child: const Text('Save All'),
           ),
         ],
@@ -583,11 +591,11 @@ class _ExtractedTransactionsWidgetState
 
     if (confirmed == true) {
       final success = await viewModel.completeAudit();
-      if (mounted && success) {
+      if (context.mounted && success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Audit completed successfully!'),
-            backgroundColor: AppTheme.success,
+          SnackBar(
+            content: const Text('Audit completed successfully!'),
+            backgroundColor: context.colors.success,
           ),
         );
         // Optionally reset or navigate away
@@ -611,7 +619,7 @@ class _ExtractedTransactionsWidgetState
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: AppTheme.error),
+            style: TextButton.styleFrom(foregroundColor: context.colors.error),
             child: const Text('Clear'),
           ),
         ],
@@ -643,31 +651,31 @@ class _TransactionContentBox extends StatelessWidget {
     required this.onDeleteRecommendation,
   }) : super(key: key);
 
-  Color _getStatusColor(MatchStatus status) {
+  Color _getStatusColor(BuildContext context, MatchStatus status) {
     switch (status) {
       case MatchStatus.critical:
-        return AppTheme.error;
+        return context.colors.error;
       case MatchStatus.potential:
         return Colors.orange;
       case MatchStatus.ambiguous:
         return const Color(0xFF86EFAC);
       case MatchStatus.confident:
-        return AppTheme.success;
+        return context.colors.success;
     }
   }
 
-  Color _getCurrentColor() {
+  Color _getCurrentColor(BuildContext context) {
     if (transaction.userModified) {
-      return AppTheme.success;
+      return context.colors.success;
     } else if (transaction.autoUpdated) {
       return const Color(0xFFBBF7D0);
     }
-    return _getStatusColor(originalStatus);
+    return _getStatusColor(context, originalStatus);
   }
 
   @override
   Widget build(BuildContext context) {
-    final statusColor = _getCurrentColor();
+    final statusColor = _getCurrentColor(context);
 
     return ContentBox(
       initiallyMinimized: true,
@@ -706,7 +714,9 @@ class _TransactionContentBox extends StatelessWidget {
         Text(
           '${transaction.amount < 0 ? '-' : '+'}${transaction.amount.abs().toStringAsFixed(2)}',
           style: AppTheme.bodyMedium.copyWith(
-            color: transaction.amount < 0 ? AppTheme.error : AppTheme.success,
+            color: transaction.amount < 0
+                ? context.colors.error
+                : context.colors.success,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -864,8 +874,8 @@ class _TransactionContentBox extends StatelessWidget {
                   '${transaction.amount < 0 ? '-' : '+'}${transaction.amount.abs().toStringAsFixed(2)}',
                   style: AppTheme.bodyMedium.copyWith(
                     color: transaction.amount < 0
-                        ? AppTheme.error
-                        : AppTheme.success,
+                        ? context.colors.error
+                        : context.colors.success,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -943,7 +953,7 @@ class _TransactionContentBox extends StatelessWidget {
               icon: const Icon(Icons.call_split, size: 18),
               label: const Text('Split Transaction'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.primaryBlue,
+                backgroundColor: context.colors.secondary,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 8,
@@ -961,7 +971,7 @@ class _TransactionContentBox extends StatelessWidget {
                       userModified: true,
                     ));
                   },
-                  activeColor: AppTheme.primaryPink,
+                  activeColor: context.colors.primary,
                 ),
                 const Text('Remember', style: AppTheme.bodySmall),
               ],
@@ -1131,7 +1141,7 @@ Future<bool?> _showVendorUpdateDialog(
       return AlertDialog(
         title: Row(
           children: [
-            Icon(Icons.auto_fix_high, color: AppTheme.primaryPink),
+            Icon(Icons.auto_fix_high, color: context.colors.primary),
             const SizedBox(width: 8),
             const Text('Update All Vendors?'),
           ],
@@ -1142,8 +1152,7 @@ Future<bool?> _showVendorUpdateDialog(
           children: [
             RichText(
               text: TextSpan(
-                style:
-                    AppTheme.bodyMedium.copyWith(color: AppTheme.textPrimary),
+                style: AppTheme.bodyMedium.copyWith(color: context.colors.textPrimary),
                 children: [
                   const TextSpan(text: 'You\'ve assigned '),
                   TextSpan(
@@ -1155,7 +1164,7 @@ Future<bool?> _showVendorUpdateDialog(
                     text: '"$accountName"',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: AppTheme.primaryPink,
+                      color: context.colors.primary,
                     ),
                   ),
                   const TextSpan(text: '.'),
@@ -1166,17 +1175,17 @@ Future<bool?> _showVendorUpdateDialog(
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppTheme.primaryPink.withOpacity(0.1),
+                color: context.colors.primary.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
                 border:
-                    Border.all(color: AppTheme.primaryPink.withOpacity(0.3)),
+                    Border.all(color: context.colors.primary.withOpacity(0.3)),
               ),
               child: Row(
                 children: [
                   Icon(
                     Icons.info_outline,
                     size: 20,
-                    color: AppTheme.primaryPink,
+                    color: context.colors.primary,
                   ),
                   const SizedBox(width: 8),
                   Expanded(
@@ -1245,7 +1254,7 @@ Future<bool?> _showVendorUpdateDialog(
             icon: const Icon(Icons.done_all, size: 18),
             label: Text('Update All ($affectedCount)'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.primaryPink,
+              backgroundColor: context.colors.primary,
               foregroundColor: Colors.white,
             ),
           ),

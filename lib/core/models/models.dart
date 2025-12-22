@@ -86,7 +86,7 @@ class Account {
   final String colorHex;
   final double budgetAmount;
   final double expenditureTotal;
-  final int responsibleParticipantId;
+  final int? responsibleParticipantId;
   final DateTime dateCreated;
 
   // Calculated Field from NOTE:
@@ -103,7 +103,7 @@ class Account {
     required this.colorHex,
     required this.budgetAmount,
     required this.expenditureTotal,
-    required this.responsibleParticipantId,
+    this.responsibleParticipantId,
     required this.dateCreated,
   });
 }

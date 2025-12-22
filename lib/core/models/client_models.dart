@@ -81,8 +81,8 @@ class ParsedTransaction extends Equatable {
   final DateTime date;
   final String vendorName;
   final double amount;
-  final bool userModified;  // Tracks if user edited this transaction
-  final int? vendorId; 
+  final bool userModified; // Tracks if user edited this transaction
+  final int? vendorId;
   final String? originalDescription;
   final String? category;
   final String? account;
@@ -91,8 +91,8 @@ class ParsedTransaction extends Equatable {
   final MatchStatus matchStatus;
   final List<String> potentialMatches;
   final AccountData? suggestedAccount;
-   final MatchStatus? originalStatus;
-   final bool autoUpdated;
+  final MatchStatus? originalStatus;
+  final bool autoUpdated;
 
   const ParsedTransaction({
     required this.id,
@@ -223,7 +223,7 @@ class Account {
   final String accountName;
   final double budgetAmount;
   final double expenditureTotal;
-  final int responsibleParticipantId;
+  final int? responsibleParticipantId;
   final DateTime dateCreated;
 
   // Calculated Field from NOTE:
@@ -239,7 +239,7 @@ class Account {
     required this.colorHex,
     required this.budgetAmount,
     required this.expenditureTotal,
-    required this.responsibleParticipantId,
+    this.responsibleParticipantId,
     required this.dateCreated,
   });
 }

@@ -177,8 +177,10 @@ class BudgetingViewModel extends ChangeNotifier {
         // Convert database accounts to local AccountData
         final List<clientModels.AccountData> accountDataList = [];
         for (var account in accountsFromDb) {
-          final participant = await _participantService
-              .getParticipant(account.responsibleParticipantId);
+          final participant = account.responsibleParticipantId != null
+              ? await _participantService
+                  .getParticipant(account.responsibleParticipantId!)
+              : null; // Check for null
 
           accountDataList.add(clientModels.AccountData(
             // Use the real database ID for editing
@@ -428,7 +430,7 @@ class BudgetingViewModel extends ChangeNotifier {
             expenditureTotal: 0.0,
             responsibleParticipantId: account.participants.isNotEmpty
                 ? account.participants.first.participantId
-                : creatorParticipantId,
+                : null, // Don't default to creator
             dateCreated: DateTime.now(),
           );
 
@@ -524,7 +526,7 @@ class BudgetingViewModel extends ChangeNotifier {
             expenditureTotal: 0.0,
             responsibleParticipantId: account.participants.isNotEmpty
                 ? account.participants.first.participantId
-                : _appContext.currentParticipant!.participantId,
+                : null, // Don't default to current user
             dateCreated: DateTime.now(),
           );
 

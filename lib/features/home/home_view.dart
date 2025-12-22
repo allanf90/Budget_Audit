@@ -9,6 +9,7 @@ import 'home_viewmodel.dart';
 import 'widgets/document_ingestion_widget.dart';
 import 'widgets/extracted_transactions_widget.dart';
 import 'widgets/side_panel.dart';
+import '../../core/widgets/theme_toggle.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({Key? key}) : super(key: key);
@@ -34,7 +35,8 @@ class _HomeViewState extends State<HomeView> {
     final isWideScreen = mediaQuery.size.width > 1024;
 
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
+      backgroundColor:
+          Colors.transparent, // Transparent to show global gradient
       body: SafeArea(
           child: Stack(children: [
         Column(
@@ -53,6 +55,11 @@ class _HomeViewState extends State<HomeView> {
           top: 12, // Align with AppHeader padding
           left: 24,
           child: Menu(),
+        ),
+        const Positioned(
+          top: 12,
+          right: 24,
+          child: ThemeToggle(),
         ),
       ])),
     );
@@ -73,11 +80,6 @@ class _HomeViewState extends State<HomeView> {
         // Side panel
         Container(
           width: MediaQuery.of(context).size.width * 0.25,
-          decoration: BoxDecoration(
-            border: Border(
-              left: BorderSide(color: AppTheme.border, width: 1),
-            ),
-          ),
           child: const SidePanel(),
         ),
       ],
@@ -134,7 +136,7 @@ class _HomeViewState extends State<HomeView> {
       children: [
         Icon(
           Icons.shield_outlined,
-          color: AppTheme.success,
+          color: context.colors.success,
           size: 20,
         ),
         const SizedBox(width: AppTheme.spacingXs),
@@ -142,7 +144,7 @@ class _HomeViewState extends State<HomeView> {
           child: RichText(
             text: TextSpan(
               style: AppTheme.bodySmall.copyWith(
-                color: AppTheme.textSecondary,
+                color: context.colors.textSecondary,
               ),
               children: [
                 const TextSpan(
@@ -151,7 +153,7 @@ class _HomeViewState extends State<HomeView> {
                 TextSpan(
                   text: 'Learn more about Budget Audit data handling here',
                   style: TextStyle(
-                    color: AppTheme.primaryPink,
+                    color: context.colors.primary,
                     decoration: TextDecoration.underline,
                   ),
                 ),
@@ -167,18 +169,18 @@ class _HomeViewState extends State<HomeView> {
     return Container(
       padding: const EdgeInsets.all(AppTheme.spacingMd),
       decoration: BoxDecoration(
-        color: AppTheme.error.withOpacity(0.1),
-        border: Border.all(color: AppTheme.error, width: 1),
+        color: context.colors.error.withOpacity(0.1),
+        border: Border.all(color: context.colors.error, width: 1),
         borderRadius: BorderRadius.circular(AppTheme.radiusMd),
       ),
       child: Row(
         children: [
-          Icon(Icons.error_outline, color: AppTheme.error, size: 20),
+          Icon(Icons.error_outline, color: context.colors.error, size: 20),
           const SizedBox(width: AppTheme.spacingMd),
           Expanded(
             child: Text(
               message,
-              style: AppTheme.bodySmall.copyWith(color: AppTheme.error),
+              style: AppTheme.bodySmall.copyWith(color: context.colors.error),
             ),
           ),
         ],

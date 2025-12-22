@@ -1593,9 +1593,9 @@ class $AccountsTable extends Accounts
   @override
   late final drift.GeneratedColumn<int> responsibleParticipantId =
       drift.GeneratedColumn<int>(
-          'responsible_participant_id', aliasedName, false,
+          'responsible_participant_id', aliasedName, true,
           type: DriftSqlType.int,
-          requiredDuringInsert: true,
+          requiredDuringInsert: false,
           defaultConstraints: GeneratedColumn.constraintIsAlways(
               'REFERENCES participants (participant_id)'));
   static const drift.VerificationMeta _dateCreatedMeta =
@@ -1681,8 +1681,6 @@ class $AccountsTable extends Accounts
           responsibleParticipantId.isAcceptableOrUnknown(
               data['responsible_participant_id']!,
               _responsibleParticipantIdMeta));
-    } else if (isInserting) {
-      context.missing(_responsibleParticipantIdMeta);
     }
     if (data.containsKey('date_created')) {
       context.handle(
@@ -1717,7 +1715,7 @@ class $AccountsTable extends Accounts
           DriftSqlType.double, data['${effectivePrefix}expenditure_total']),
       responsibleParticipantId: attachedDatabase.typeMapping.read(
           DriftSqlType.int,
-          data['${effectivePrefix}responsible_participant_id'])!,
+          data['${effectivePrefix}responsible_participant_id']),
       dateCreated: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}date_created'])!,
     );
@@ -1737,7 +1735,7 @@ class Account extends drift.DataClass implements drift.Insertable<Account> {
   final String colorHex;
   final double budgetAmount;
   final double? expenditureTotal;
-  final int responsibleParticipantId;
+  final int? responsibleParticipantId;
   final DateTime dateCreated;
   const Account(
       {required this.accountId,
@@ -1747,7 +1745,7 @@ class Account extends drift.DataClass implements drift.Insertable<Account> {
       required this.colorHex,
       required this.budgetAmount,
       this.expenditureTotal,
-      required this.responsibleParticipantId,
+      this.responsibleParticipantId,
       required this.dateCreated});
   @override
   Map<String, drift.Expression> toColumns(bool nullToAbsent) {
@@ -1761,8 +1759,10 @@ class Account extends drift.DataClass implements drift.Insertable<Account> {
     if (!nullToAbsent || expenditureTotal != null) {
       map['expenditure_total'] = drift.Variable<double>(expenditureTotal);
     }
-    map['responsible_participant_id'] =
-        drift.Variable<int>(responsibleParticipantId);
+    if (!nullToAbsent || responsibleParticipantId != null) {
+      map['responsible_participant_id'] =
+          drift.Variable<int>(responsibleParticipantId);
+    }
     map['date_created'] = drift.Variable<DateTime>(dateCreated);
     return map;
   }
@@ -1778,7 +1778,9 @@ class Account extends drift.DataClass implements drift.Insertable<Account> {
       expenditureTotal: expenditureTotal == null && nullToAbsent
           ? const drift.Value.absent()
           : drift.Value(expenditureTotal),
-      responsibleParticipantId: drift.Value(responsibleParticipantId),
+      responsibleParticipantId: responsibleParticipantId == null && nullToAbsent
+          ? const drift.Value.absent()
+          : drift.Value(responsibleParticipantId),
       dateCreated: drift.Value(dateCreated),
     );
   }
@@ -1795,7 +1797,7 @@ class Account extends drift.DataClass implements drift.Insertable<Account> {
       budgetAmount: serializer.fromJson<double>(json['budgetAmount']),
       expenditureTotal: serializer.fromJson<double?>(json['expenditureTotal']),
       responsibleParticipantId:
-          serializer.fromJson<int>(json['responsibleParticipantId']),
+          serializer.fromJson<int?>(json['responsibleParticipantId']),
       dateCreated: serializer.fromJson<DateTime>(json['dateCreated']),
     );
   }
@@ -1811,7 +1813,7 @@ class Account extends drift.DataClass implements drift.Insertable<Account> {
       'budgetAmount': serializer.toJson<double>(budgetAmount),
       'expenditureTotal': serializer.toJson<double?>(expenditureTotal),
       'responsibleParticipantId':
-          serializer.toJson<int>(responsibleParticipantId),
+          serializer.toJson<int?>(responsibleParticipantId),
       'dateCreated': serializer.toJson<DateTime>(dateCreated),
     };
   }
@@ -1824,7 +1826,8 @@ class Account extends drift.DataClass implements drift.Insertable<Account> {
           String? colorHex,
           double? budgetAmount,
           drift.Value<double?> expenditureTotal = const drift.Value.absent(),
-          int? responsibleParticipantId,
+          drift.Value<int?> responsibleParticipantId =
+              const drift.Value.absent(),
           DateTime? dateCreated}) =>
       Account(
         accountId: accountId ?? this.accountId,
@@ -1836,8 +1839,9 @@ class Account extends drift.DataClass implements drift.Insertable<Account> {
         expenditureTotal: expenditureTotal.present
             ? expenditureTotal.value
             : this.expenditureTotal,
-        responsibleParticipantId:
-            responsibleParticipantId ?? this.responsibleParticipantId,
+        responsibleParticipantId: responsibleParticipantId.present
+            ? responsibleParticipantId.value
+            : this.responsibleParticipantId,
         dateCreated: dateCreated ?? this.dateCreated,
       );
   Account copyWithCompanion(AccountsCompanion data) {
@@ -1914,7 +1918,7 @@ class AccountsCompanion extends drift.UpdateCompanion<Account> {
   final drift.Value<String> colorHex;
   final drift.Value<double> budgetAmount;
   final drift.Value<double?> expenditureTotal;
-  final drift.Value<int> responsibleParticipantId;
+  final drift.Value<int?> responsibleParticipantId;
   final drift.Value<DateTime> dateCreated;
   const AccountsCompanion({
     this.accountId = const drift.Value.absent(),
@@ -1935,14 +1939,13 @@ class AccountsCompanion extends drift.UpdateCompanion<Account> {
     required String colorHex,
     required double budgetAmount,
     this.expenditureTotal = const drift.Value.absent(),
-    required int responsibleParticipantId,
+    this.responsibleParticipantId = const drift.Value.absent(),
     required DateTime dateCreated,
   })  : categoryId = drift.Value(categoryId),
         templateId = drift.Value(templateId),
         accountName = drift.Value(accountName),
         colorHex = drift.Value(colorHex),
         budgetAmount = drift.Value(budgetAmount),
-        responsibleParticipantId = drift.Value(responsibleParticipantId),
         dateCreated = drift.Value(dateCreated);
   static drift.Insertable<Account> custom({
     drift.Expression<int>? accountId,
@@ -1977,7 +1980,7 @@ class AccountsCompanion extends drift.UpdateCompanion<Account> {
       drift.Value<String>? colorHex,
       drift.Value<double>? budgetAmount,
       drift.Value<double?>? expenditureTotal,
-      drift.Value<int>? responsibleParticipantId,
+      drift.Value<int?>? responsibleParticipantId,
       drift.Value<DateTime>? dateCreated}) {
     return AccountsCompanion(
       accountId: accountId ?? this.accountId,
@@ -6682,7 +6685,7 @@ typedef $$AccountsTableCreateCompanionBuilder = AccountsCompanion Function({
   required String colorHex,
   required double budgetAmount,
   drift.Value<double?> expenditureTotal,
-  required int responsibleParticipantId,
+  drift.Value<int?> responsibleParticipantId,
   required DateTime dateCreated,
 });
 typedef $$AccountsTableUpdateCompanionBuilder = AccountsCompanion Function({
@@ -6693,7 +6696,7 @@ typedef $$AccountsTableUpdateCompanionBuilder = AccountsCompanion Function({
   drift.Value<String> colorHex,
   drift.Value<double> budgetAmount,
   drift.Value<double?> expenditureTotal,
-  drift.Value<int> responsibleParticipantId,
+  drift.Value<int?> responsibleParticipantId,
   drift.Value<DateTime> dateCreated,
 });
 
@@ -6735,9 +6738,9 @@ final class $$AccountsTableReferences
       db.participants.createAlias(drift.$_aliasNameGenerator(
           db.accounts.responsibleParticipantId, db.participants.participantId));
 
-  $$ParticipantsTableProcessedTableManager get responsibleParticipantId {
-    final $_column = $_itemColumn<int>('responsible_participant_id')!;
-
+  $$ParticipantsTableProcessedTableManager? get responsibleParticipantId {
+    final $_column = $_itemColumn<int>('responsible_participant_id');
+    if ($_column == null) return null;
     final manager = $$ParticipantsTableTableManager($_db, $_db.participants)
         .filter((f) => f.participantId.sqlEquals($_column));
     final item =
@@ -7184,7 +7187,7 @@ class $$AccountsTableTableManager extends drift.RootTableManager<
             drift.Value<String> colorHex = const drift.Value.absent(),
             drift.Value<double> budgetAmount = const drift.Value.absent(),
             drift.Value<double?> expenditureTotal = const drift.Value.absent(),
-            drift.Value<int> responsibleParticipantId =
+            drift.Value<int?> responsibleParticipantId =
                 const drift.Value.absent(),
             drift.Value<DateTime> dateCreated = const drift.Value.absent(),
           }) =>
@@ -7207,7 +7210,8 @@ class $$AccountsTableTableManager extends drift.RootTableManager<
             required String colorHex,
             required double budgetAmount,
             drift.Value<double?> expenditureTotal = const drift.Value.absent(),
-            required int responsibleParticipantId,
+            drift.Value<int?> responsibleParticipantId =
+                const drift.Value.absent(),
             required DateTime dateCreated,
           }) =>
               AccountsCompanion.insert(

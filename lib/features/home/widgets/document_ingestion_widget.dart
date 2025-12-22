@@ -39,9 +39,9 @@ class _DocumentIngestionWidgetState extends State<DocumentIngestionWidget> {
     return Container(
       padding: const EdgeInsets.all(AppTheme.spacingLg),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.colors.background,
         borderRadius: BorderRadius.circular(AppTheme.radiusXl),
-        border: Border.all(color: AppTheme.border, width: 1),
+        border: Border.all(color: context.colors.border, width: 1),
       ),
       child: Form(
         key: _formKey,
@@ -51,7 +51,7 @@ class _DocumentIngestionWidgetState extends State<DocumentIngestionWidget> {
             Text(
               'Enter your bank statement for analysis. Information about each transaction will be automatically read and auto filled',
               style: AppTheme.bodyMedium.copyWith(
-                color: AppTheme.textSecondary,
+                color: context.colors.textSecondary,
               ),
             ),
             const SizedBox(height: AppTheme.spacingMd),
@@ -98,14 +98,14 @@ class _DocumentIngestionWidgetState extends State<DocumentIngestionWidget> {
       children: [
         Row(
           children: [
-            Text(
+            const Text(
               'Browse Document (Only PDF)',
               style: AppTheme.label,
             ),
             const SizedBox(width: 4),
             Text(
               '*',
-              style: AppTheme.label.copyWith(color: AppTheme.error),
+              style: AppTheme.label.copyWith(color: context.colors.error),
             ),
           ],
         ),
@@ -115,11 +115,11 @@ class _DocumentIngestionWidgetState extends State<DocumentIngestionWidget> {
           child: Container(
             height: 120,
             decoration: BoxDecoration(
-              color: AppTheme.surface,
+              color: context.colors.surface,
               border: Border.all(
                 color: _selectedFilePath != null
-                    ? AppTheme.primaryPink
-                    : AppTheme.border,
+                    ? context.colors.primary
+                    : context.colors.border,
                 width: _selectedFilePath != null ? 2 : 1,
               ),
               borderRadius: BorderRadius.circular(AppTheme.radiusSm),
@@ -134,14 +134,14 @@ class _DocumentIngestionWidgetState extends State<DocumentIngestionWidget> {
                             children: [
                               Icon(
                                 Icons.check_circle,
-                                color: AppTheme.primaryPink,
+                                color: context.colors.primary,
                                 size: 32,
                               ),
                               const SizedBox(height: AppTheme.spacingXs),
                               Text(
                                 _selectedFileName!,
                                 style: AppTheme.bodySmall.copyWith(
-                                  color: AppTheme.textPrimary,
+                                  color: context.colors.textPrimary,
                                   fontWeight: FontWeight.w500,
                                 ),
                                 textAlign: TextAlign.center,
@@ -153,14 +153,14 @@ class _DocumentIngestionWidgetState extends State<DocumentIngestionWidget> {
                             children: [
                               Icon(
                                 Icons.add_circle_outline,
-                                color: AppTheme.textSecondary,
+                                color: context.colors.textSecondary,
                                 size: 32,
                               ),
                               const SizedBox(height: AppTheme.spacingXs),
                               Text(
                                 'Click to browse',
                                 style: AppTheme.bodySmall.copyWith(
-                                  color: AppTheme.textSecondary,
+                                  color: context.colors.textSecondary,
                                 ),
                               ),
                             ],
@@ -187,7 +187,7 @@ class _DocumentIngestionWidgetState extends State<DocumentIngestionWidget> {
             Icon(
               Icons.info_outline,
               size: 16,
-              color: AppTheme.textSecondary,
+              color: context.colors.textSecondary,
             ),
           ],
         ),
@@ -197,7 +197,7 @@ class _DocumentIngestionWidgetState extends State<DocumentIngestionWidget> {
           decoration: InputDecoration(
             hintText: '• • • •',
             hintStyle: AppTheme.bodyMedium.copyWith(
-              color: AppTheme.textTertiary,
+              color: context.colors.textTertiary,
             ),
             helperText:
                 'Allows the software to read the document if it is password protected',
@@ -215,14 +215,14 @@ class _DocumentIngestionWidgetState extends State<DocumentIngestionWidget> {
       children: [
         Row(
           children: [
-            Text(
+            const Text(
               'Select the document owner',
               style: AppTheme.label,
             ),
             const SizedBox(width: 4),
             Text(
               '*',
-              style: AppTheme.label.copyWith(color: AppTheme.error),
+              style: AppTheme.label.copyWith(color: context.colors.error),
             ),
           ],
         ),
@@ -237,7 +237,7 @@ class _DocumentIngestionWidgetState extends State<DocumentIngestionWidget> {
           decoration: InputDecoration(
             hintText: 'Owner',
             hintStyle: AppTheme.bodyMedium.copyWith(
-              color: AppTheme.textTertiary,
+              color: context.colors.textTertiary,
             ),
           ),
           validator: (value) {
@@ -278,7 +278,7 @@ class _DocumentIngestionWidgetState extends State<DocumentIngestionWidget> {
             const SizedBox(width: 4),
             Text(
               '*',
-              style: AppTheme.label.copyWith(color: AppTheme.error),
+              style: AppTheme.label.copyWith(color: context.colors.error),
             ),
           ],
         ),
@@ -306,10 +306,12 @@ class _DocumentIngestionWidgetState extends State<DocumentIngestionWidget> {
                 ),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? AppTheme.primaryPink.withOpacity(0.1)
-                      : AppTheme.surface,
+                      ? context.colors.primary.withOpacity(0.1)
+                      : context.colors.surface,
                   border: Border.all(
-                    color: isSelected ? AppTheme.primaryPink : AppTheme.border,
+                    color: isSelected
+                        ? context.colors.primary
+                        : context.colors.border,
                     width: isSelected ? 2 : 1,
                   ),
                   borderRadius: BorderRadius.circular(AppTheme.radiusSm),
@@ -318,8 +320,8 @@ class _DocumentIngestionWidgetState extends State<DocumentIngestionWidget> {
                   institution.displayName,
                   style: AppTheme.bodyMedium.copyWith(
                     color: isSelected
-                        ? AppTheme.primaryPink
-                        : AppTheme.textPrimary,
+                        ? context.colors.primary
+                        : context.colors.textPrimary,
                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                   ),
                 ),
@@ -349,7 +351,7 @@ class _DocumentIngestionWidgetState extends State<DocumentIngestionWidget> {
                   : 'Verify Document and Add more',
             ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.primaryBlue,
+              backgroundColor: context.colors.secondary,
               padding: const EdgeInsets.symmetric(vertical: AppTheme.spacingMd),
             ),
           ),
@@ -425,9 +427,9 @@ class _DocumentIngestionWidgetState extends State<DocumentIngestionWidget> {
 
     if (_selectedFilePath == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('Please select a PDF document'),
-          backgroundColor: AppTheme.error,
+          backgroundColor: context.colors.error,
         ),
       );
       return;
@@ -435,9 +437,9 @@ class _DocumentIngestionWidgetState extends State<DocumentIngestionWidget> {
 
     if (_selectedInstitution == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('Please select a financial institution'),
-          backgroundColor: AppTheme.error,
+          backgroundColor: context.colors.error,
         ),
       );
       return;
@@ -457,7 +459,7 @@ class _DocumentIngestionWidgetState extends State<DocumentIngestionWidget> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Document verified and added: $_selectedFileName'),
-          backgroundColor: AppTheme.success,
+          backgroundColor: context.colors.success,
         ),
       );
 
@@ -513,13 +515,13 @@ class _DocumentIngestionWidgetState extends State<DocumentIngestionWidget> {
     return Container(
       padding: const EdgeInsets.all(AppTheme.spacingMd),
       decoration: BoxDecoration(
-        color: AppTheme.primaryBlue.withOpacity(0.1),
+        color: context.colors.secondary.withOpacity(0.1),
         borderRadius: BorderRadius.circular(AppTheme.radiusSm),
-        border: Border.all(color: AppTheme.primaryBlue),
+        border: Border.all(color: context.colors.secondary),
       ),
       child: Row(
         children: [
-          Icon(Icons.description, color: AppTheme.primaryBlue),
+          Icon(Icons.description, color: context.colors.secondary),
           const SizedBox(width: AppTheme.spacingMd),
           Expanded(
             child: Column(
@@ -528,7 +530,7 @@ class _DocumentIngestionWidgetState extends State<DocumentIngestionWidget> {
                 Text(
                   'Active Budget',
                   style: AppTheme.bodySmall.copyWith(
-                    color: AppTheme.primaryBlue,
+                    color: context.colors.secondary,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -536,7 +538,7 @@ class _DocumentIngestionWidgetState extends State<DocumentIngestionWidget> {
                   viewModel.currentTemplate?.templateName ?? 'Unknown Template',
                   style: AppTheme.bodyMedium.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: AppTheme.primaryBlue,
+                    color: context.colors.secondary,
                   ),
                 ),
               ],

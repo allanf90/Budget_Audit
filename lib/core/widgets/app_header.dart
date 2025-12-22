@@ -20,7 +20,7 @@ class AppHeader extends StatelessWidget {
     final mediaQuery = MediaQuery.of(context);
     final screenHeight = mediaQuery.size.height;
     // Calculate max height (1/8th of screen)
-    final maxHeaderHeight = screenHeight / 8;
+    final maxHeaderHeight = screenHeight / 4;
     // Use provided logoHeight or calculate based on constraints, ensuring it's not too large
     final effectiveLogoHeight = logoHeight ?? (maxHeaderHeight * 0.6);
 
@@ -41,7 +41,7 @@ class AppHeader extends StatelessWidget {
                 height: effectiveLogoHeight,
                 width: effectiveLogoHeight,
                 decoration: BoxDecoration(
-                  color: AppTheme.primaryPink.withOpacity(0.1),
+                  color: context.colors.primary.withOpacity(0.1),
                   borderRadius:
                       BorderRadius.circular(effectiveLogoHeight * 0.2),
                 ),
@@ -51,7 +51,7 @@ class AppHeader extends StatelessWidget {
                     style: TextStyle(
                       fontSize: effectiveLogoHeight * 0.4,
                       fontWeight: FontWeight.bold,
-                      color: AppTheme.primaryPink,
+                      color: context.colors.primary,
                     ),
                   ),
                 ),
@@ -63,7 +63,7 @@ class AppHeader extends StatelessWidget {
             Text(
               subtitle!,
               style: AppTheme.bodyMedium.copyWith(
-                color: AppTheme.textSecondary,
+                color: context.colors.textSecondary,
               ),
               textAlign: TextAlign.center,
             ),

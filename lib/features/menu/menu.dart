@@ -20,18 +20,18 @@ class Menu extends StatelessWidget {
         final availableDestinations = viewModel.availableDestinations;
 
         return PopupMenuButton<String>(
-          icon: const Icon(
+          icon: Icon(
             Icons.menu,
-            color: AppTheme.textPrimary,
+            color: context.colors.textPrimary,
             size: 28,
           ),
           padding: EdgeInsets.zero,
           // Glassmorphism: Semi-transparent surface
-          color: AppTheme.surface.withOpacity(0.85),
+          color: context.colors.surface.withOpacity(0.85),
           elevation: 0, // Remove default shadow for cleaner glass look
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppTheme.radiusXl),
-            side: const BorderSide(color: AppTheme.border, width: 1.0),
+            side: BorderSide(color: context.colors.border, width: 1.0),
           ),
           onSelected: (String route) {
             viewModel.menuToggled();
@@ -58,12 +58,12 @@ class Menu extends StatelessWidget {
                 value: destination.route,
                 child: Row(
                   children: [
-                    Icon(destination.icon, color: AppTheme.textPrimary),
+                    Icon(destination.icon, color: context.colors.textPrimary),
                     const SizedBox(width: AppTheme.spacingXs),
                     Text(
                       destination.label,
                       style: AppTheme.bodyMedium.copyWith(
-                        color: AppTheme.textPrimary,
+                        color: context.colors.textPrimary,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
