@@ -448,6 +448,61 @@ class TransactionService {
     }
   }
 
+  
+/// Fetch all transactions for a list of account IDs
+  Future<List<models.Transaction>> getTransactionsForAccounts(
+      List<int> accountIds) async {
+    try {
+      if (accountIds.isEmpty) return [];
+
+      final query = _appDatabase.select(_appDatabase.transactions)
+        ..where((tbl) => tbl.accountId.isIn(accountIds))
+        ..orderBy([
+          (t) => drift.OrderingTerm(
+              expression: t.date, mode: drift.OrderingMode.desc)
+        ]);
+
+      final results = await query.get();
+
+      return results
+          .map((t) => models.Transaction(
+                transactionId: t.transactionId,
+                syncId: t.syncId,
+                accountId: t.accountId,
+                isIgnored: t.isIgnored,
+                date: t.date,
+                vendorId: t.vendorId,
+                amount: t.amount,
+                participantId: t.participantId,
+                editorParticipantId: t.editorParticipantId,
+                reason: t.reason,
+              ))
+          .toList();
+    } catch (e, st) {
+      _logger.severe('Error fetching transactions for accounts', e, st);
+      return [];
+    }
+  }
+
+  /// Fetch all transactions for a specific template
+  Future<List<models.Transaction>> getTransactionsForTemplate(
+      int templateId) async {
+    try {
+      // First, get all accounts for this template
+      final accountsQuery = _appDatabase.select(_appDatabase.accounts)
+        ..where((tbl) => tbl.templateId.equals(templateId));
+      final accounts = await accountsQuery.get();
+      final accountIds = accounts.map((a) => a.accountId).toList();
+
+      // Then get all transactions for these accounts
+      return await getTransactionsForAccounts(accountIds);
+    } catch (e, st) {
+      _logger.severe(
+          'Error fetching transactions for template $templateId', e, st);
+      return [];
+    }
+  }
+
   /// Deletes a vendor match history entry
   Future<bool> deleteVendorMatchHistory({
     required int vendorId,
