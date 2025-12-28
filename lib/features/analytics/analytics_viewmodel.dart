@@ -278,21 +278,28 @@ class AnalyticsViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Load all transactions associated with a template
+/// Load all transactions associated with a template
   Future<List<Transaction>> _loadTransactionsForTemplate(int templateId) async {
-    // Get all accounts for this template
-    final accounts = await _budgetService.accountService
-        .getAllAccountsForTemplate(templateId);
-    final accountIds = accounts.map((a) => a.accountId).toSet();
-
-    // This would require a method in TransactionService to fetch by account IDs
-    // For now, we'll need to add this to the service layer
-    // Placeholder: return empty list
-    // TODO: Implement getTransactionsForAccounts in TransactionService
-
-    // Since we don't have this method yet, I'll note it needs to be added
-    return [];
+    return await _budgetService.transactionService
+        .getTransactionsForTemplate(templateId);
   }
+
+
+
+  /// Get number of days for a period string
+  // int _getPeriodDays(String period) {
+  //   final normalized = period.toLowerCase().trim();
+  //   if (normalized.contains('annual') || normalized.contains('year')) {
+  //     return 365;
+  //   } else if (normalized.contains('quarter')) {
+  //     return 90;
+  //   } else if (normalized.contains('month')) {
+  //     return 30;
+  //   } else if (normalized.contains('week')) {
+  //     return 7;
+  //   }
+  //   return 30; // Default to monthly
+  // }
 
   /// Set date range based on transactions
   void _setDateRangeFromTransactions() {
@@ -340,6 +347,7 @@ class AnalyticsViewModel extends ChangeNotifier {
   }
 
   /// Compute category spending data for pie chart
+  /// Compute category spending data for pie chart
   void _computeCategorySpending() {
     final Map<int, double> categorySpending = {};
     final Map<int, double> categoryBudget = {};
@@ -361,10 +369,10 @@ class AnalyticsViewModel extends ChangeNotifier {
       categoryBudget[categoryId] =
           (categoryBudget[categoryId] ?? 0) + account.budgetAmount;
 
-      // Store account data
+      // Store account data with color from account model
       categoryAccounts[categoryId] ??= [];
       categoryAccounts[categoryId]!.add(AccountSpendingData(
-        account: account,
+        account: account, // Account object has .color getter
         budgeted: account.budgetAmount,
         spent: spent,
         percentage:
@@ -372,14 +380,14 @@ class AnalyticsViewModel extends ChangeNotifier {
       ));
     }
 
-    // Create category spending data
+    // Create category spending data with color from category model
     _categorySpendingData = _allCategories.map((category) {
       final spent = categorySpending[category.categoryId] ?? 0;
       final budgeted = categoryBudget[category.categoryId] ?? 0;
       final accounts = categoryAccounts[category.categoryId] ?? [];
 
       return CategorySpendingData(
-        category: category,
+        category: category, // Category object has .color getter
         budgeted: budgeted,
         spent: spent,
         percentage: totalBudgeted > 0 ? (budgeted / totalBudgeted) * 100 : 0,

@@ -263,4 +263,59 @@ class ParticipantService {
     }
   }
 
+  /// Add a participant to a template (useful for template management)
+  Future<bool> addParticipantToTemplate({
+    required int templateId,
+    required int participantId,
+    required String permissionRole,
+  }) async {
+    try {
+      await _database.into(_database.templateParticipants).insert(
+            db.TemplateParticipantsCompanion.insert(
+              templateId: templateId,
+              participantId: participantId,
+              permissionRole: permissionRole,
+            ),
+          );
+      _logger.info(
+          "Added participant $participantId to template $templateId with role $permissionRole");
+      return true;
+    } catch (e, stack) {
+      _logger.severe(
+          "Error adding participant $participantId to template $templateId",
+          e,
+          stack);
+      rethrow;
+    }
+  }
+
+  /// Remove a participant from a template
+  Future<bool> removeParticipantFromTemplate({
+    required int templateId,
+    required int participantId,
+  }) async {
+    try {
+      final deleted = await (_database.delete(_database.templateParticipants)
+            ..where((tbl) =>
+                tbl.templateId.equals(templateId) &
+                tbl.participantId.equals(participantId)))
+          .go();
+
+      final success = deleted > 0;
+      if (success) {
+        _logger.info(
+            "Removed participant $participantId from template $templateId");
+      } else {
+        _logger.warning("No participant removed from template $templateId");
+      }
+      return success;
+    } catch (e, stack) {
+      _logger.severe(
+          "Error removing participant $participantId from template $templateId",
+          e,
+          stack);
+      rethrow;
+    }
+  }
+
 }

@@ -19,7 +19,7 @@ class ThemeToggle extends StatelessWidget {
             color: context.colors.textPrimary,
             size: 28,
           ),
-          tooltip: isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode',
+          tooltip: isDark ? 'Switch from Light Mode' : 'Switch from Dark Mode',
         );
       },
     );

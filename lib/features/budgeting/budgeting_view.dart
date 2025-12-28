@@ -6,7 +6,7 @@ import '../../core/widgets/app_header.dart';
 import '../../core/widgets/modal_box.dart';
 import '../../core/context.dart';
 import '../../core/models/models.dart' as models;
-import '../../features/menu/menu.dart';
+
 import 'budgeting_viewmodel.dart';
 import 'widgets/import_option_card.dart';
 import 'widgets/search_filter_bar.dart';
@@ -124,11 +124,6 @@ class _BudgetingViewState extends State<BudgetingView> {
               },
             ),
             // Menu always accessible on top left
-            const Positioned(
-              top: 12, // Align with AppHeader padding
-              left: 24,
-              child: Menu(),
-            ),
           ],
         ),
       ),

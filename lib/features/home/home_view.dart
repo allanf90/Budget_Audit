@@ -1,6 +1,5 @@
 // lib/features/home/home_view.dart
 
-import 'package:budget_audit/features/menu/menu.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_theme.dart';
@@ -49,11 +48,6 @@ class _HomeViewState extends State<HomeView> {
                   : _buildNarrowScreenLayout(context, viewModel),
             ),
           ],
-        ),
-        const Positioned(
-          top: 12, // Align with AppHeader padding
-          left: 24,
-          child: Menu(),
         ),
       ])),
     );

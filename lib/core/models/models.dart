@@ -1,9 +1,8 @@
-// lib/core/models/models.dart
-
+import 'package:equatable/equatable.dart';
 import 'package:flutter/painting.dart'; // For Color
 
 // 1.1. Participants Model
-class Participant {
+class Participant extends Equatable {
   final int participantId;
   final String firstName;
   final String? lastName;
@@ -20,6 +19,16 @@ class Participant {
     required this.role,
     required this.email,
   });
+
+  @override
+  List<Object?> get props => [
+        participantId,
+        firstName,
+        lastName,
+        nickname,
+        role,
+        email,
+      ];
 }
 
 enum Role {
@@ -39,7 +48,7 @@ enum Role {
 }
 
 // 1.2. Categories Model
-class Category {
+class Category extends Equatable {
   final int categoryId;
   final int templateId;
   final String categoryName;
@@ -54,10 +63,18 @@ class Category {
     required this.categoryName,
     required this.colorHex,
   });
+
+  @override
+  List<Object?> get props => [
+        categoryId,
+        templateId,
+        categoryName,
+        colorHex,
+      ];
 }
 
 // 1.7. Templates Model
-class Template {
+class Template extends Equatable {
   final int templateId;
   final int? syncId;
   final String? spreadSheetId;
@@ -77,10 +94,22 @@ class Template {
     this.timesUsed,
     required this.period,
   });
+
+  @override
+  List<Object?> get props => [
+        templateId,
+        syncId,
+        spreadSheetId,
+        templateName,
+        creatorParticipantId,
+        dateCreated,
+        timesUsed,
+        period,
+      ];
 }
 
 // 1.3. Accounts Model
-class Account {
+class Account extends Equatable {
   final int accountId;
   final int categoryId;
   final int templateId;
@@ -108,10 +137,23 @@ class Account {
     this.responsibleParticipantId,
     required this.dateCreated,
   });
+
+  @override
+  List<Object?> get props => [
+        accountId,
+        categoryId,
+        templateId,
+        accountName,
+        colorHex,
+        budgetAmount,
+        expenditureTotal,
+        responsibleParticipantId,
+        dateCreated,
+      ];
 }
 
 // 1.5. Vendors Model
-class Vendor {
+class Vendor extends Equatable {
   final int vendorId;
   final String vendorName;
 
@@ -119,10 +161,13 @@ class Vendor {
     required this.vendorId,
     required this.vendorName,
   });
+
+  @override
+  List<Object?> get props => [vendorId, vendorName];
 }
 
 // 1.9 SyncLog Model
-class SyncLogEntry {
+class SyncLogEntry extends Equatable {
   final int syncId;
   final int? transactionId;
   final SyncDirection syncDirection;
@@ -144,6 +189,19 @@ class SyncLogEntry {
     required this.sheetUrl,
     required this.associatedTemplate,
   });
+
+  @override
+  List<Object?> get props => [
+        syncId,
+        transactionId,
+        syncDirection,
+        dateSynced,
+        synced,
+        success,
+        errorMessage,
+        sheetUrl,
+        associatedTemplate,
+      ];
 }
 
 enum SyncDirection {
@@ -162,9 +220,8 @@ enum SyncDirection {
   }
 }
 
-
 // 1.4. Transactions Model
-class Transaction {
+class Transaction extends Equatable {
   final int transactionId;
   final int syncId;
   final int accountId;
@@ -188,10 +245,24 @@ class Transaction {
     required this.editorParticipantId,
     this.reason,
   });
+
+  @override
+  List<Object?> get props => [
+        transactionId,
+        syncId,
+        accountId,
+        isIgnored,
+        date,
+        vendorId,
+        amount,
+        participantId,
+        editorParticipantId,
+        reason,
+      ];
 }
 
 // 1.10 VendorMatchHistory Model
-class VendorMatchHistory {
+class VendorMatchHistory extends Equatable {
   final int vendorMatchId;
   final int vendorId;
   final int accountId;
@@ -207,6 +278,16 @@ class VendorMatchHistory {
     required this.useCount,
     required this.lastUsed,
   });
+
+  @override
+  List<Object?> get props => [
+        vendorMatchId,
+        vendorId,
+        accountId,
+        participantId,
+        useCount,
+        lastUsed,
+      ];
 }
 
 // (Other models like TransactionEditHistory, VendorPreference,

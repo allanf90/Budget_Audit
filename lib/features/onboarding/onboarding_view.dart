@@ -7,7 +7,6 @@ import 'widgets/participant_form.dart';
 import 'widgets/participant_grid.dart';
 import 'widgets/sign_in_form.dart';
 import '../../core/theme/app_theme.dart';
-import '../../features/menu/menu.dart';
 
 class OnboardingView extends StatefulWidget {
   const OnboardingView({Key? key}) : super(key: key);
@@ -47,11 +46,6 @@ class _OnboardingViewState extends State<OnboardingView> {
                   child: _buildContent(),
                 ),
               ],
-            ),
-            const Positioned(
-              top: 12,
-              left: 24,
-              child: Menu(),
             ),
           ],
         ),
@@ -194,7 +188,7 @@ class _OnboardingViewState extends State<OnboardingView> {
           color: isSelected ? Colors.white : Colors.transparent,
           borderRadius: BorderRadius.circular(AppTheme.radiusMd),
           border: isSelected
-              ?  Border(
+              ? Border(
                   bottom: BorderSide(
                     color: context.colors.primary,
                     width: 3,
@@ -205,7 +199,9 @@ class _OnboardingViewState extends State<OnboardingView> {
         child: Text(
           label,
           style: AppTheme.label.copyWith(
-            color: isSelected ? context.colors.textPrimary : context.colors.textSecondary,
+            color: isSelected
+                ? context.colors.textPrimary
+                : context.colors.textSecondary,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
           ),
           textAlign: TextAlign.center,
