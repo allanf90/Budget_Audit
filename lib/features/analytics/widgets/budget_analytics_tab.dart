@@ -16,7 +16,7 @@ class BudgetAnalyticsTab extends StatelessWidget {
     final mediaQuery = MediaQuery.of(context);
     final isWideScreen = mediaQuery.size.width > 800;
 
-    return SingleChildScrollView(
+    return Padding(
       padding: const EdgeInsets.all(AppTheme.spacingMd),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

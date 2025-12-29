@@ -61,6 +61,7 @@ class HomeViewModel extends ChangeNotifier {
   int _currentDocumentIndex = 0;
   Set<String> _completedDocumentIds = {};
   bool _autoUpdateVendorAssociations = true; // Toggle for vendor auto-update
+  bool _auditCompletedSuccessfully = false;
 
   HomeViewModel({
     required DocumentService documentService,
@@ -85,6 +86,7 @@ class HomeViewModel extends ChangeNotifier {
   int get currentDocumentIndex => _currentDocumentIndex;
   int get totalDocuments => _uploadedDocuments.length;
   bool get autoUpdateVendorAssociations => _autoUpdateVendorAssociations;
+  bool get auditCompletedSuccessfully => _auditCompletedSuccessfully;
 
   /// Get all document groups with auto-computed completion status
   List<DocumentTransactionGroup> get documentGroups {
@@ -262,6 +264,7 @@ class HomeViewModel extends ChangeNotifier {
           );
 
           // Record vendor match history if user wants to remember
+          debugPrint("User wants to use memory: ${transaction.useMemory}");
           if (transaction.useMemory) {
             await _budgetService.transactionService.recordVendorMatch(
               vendorId: vendorId,
@@ -278,6 +281,7 @@ class HomeViewModel extends ChangeNotifier {
           'Audit completed successfully. Saved $savedCount transactions.');
 
       _isLoading = false;
+      _auditCompletedSuccessfully = true;
       notifyListeners();
       return true;
     } catch (e, st) {
@@ -451,7 +455,7 @@ class HomeViewModel extends ChangeNotifier {
     _uploadedDocuments.removeWhere((doc) => doc.id == documentId);
     _transactionsByDocument.remove(documentId);
     _completedDocumentIds.remove(documentId);
-    _documentService.cleanupDocument(document);
+    // _documentService.cleanupDocument(document); // Commented to prevent deletion of user files
 
     // Adjust current index if needed
     if (_currentDocumentIndex >= _uploadedDocuments.length &&
@@ -573,6 +577,7 @@ class HomeViewModel extends ChangeNotifier {
         if (exactMatch != null) {
           vendorId = exactMatch.vendorId;
           finalVendorName = exactMatch.vendorName;
+          debugPrint('Exact match found: ${exactMatch.vendorName}');
 
           final history = await _budgetService.transactionService
               .getVendorMatchHistory(exactMatch.vendorId);
@@ -597,7 +602,7 @@ class HomeViewModel extends ChangeNotifier {
               );
             }
           } else {
-            matchStatus = MatchStatus.critical;
+            matchStatus = MatchStatus.critical; //*
           }
         } else {
           // Fuzzy match
@@ -782,14 +787,15 @@ class HomeViewModel extends ChangeNotifier {
   }
 
   void reset() {
-    for (final doc in _uploadedDocuments) {
-      _documentService.cleanupDocument(doc);
-    }
+    // for (final doc in _uploadedDocuments) {
+    //   _documentService.cleanupDocument(doc); // Commented to prevent deletion of user files
+    // }
     _uploadedDocuments.clear();
     _transactionsByDocument.clear();
     _completedDocumentIds.clear();
     _currentDocumentIndex = 0;
     _hasRunAudit = false;
+    _auditCompletedSuccessfully = false;
     _errorMessage = null;
     notifyListeners();
   }

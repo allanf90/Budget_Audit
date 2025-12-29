@@ -77,8 +77,6 @@ class _ExtractedTransactionsWidgetState
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            
-
             // Navigation controls
             _buildNavigationControls(viewModel),
             //const SizedBox(height: 16),
@@ -593,14 +591,8 @@ class _ExtractedTransactionsWidgetState
     if (confirmed == true) {
       final success = await viewModel.completeAudit();
       if (context.mounted && success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Audit completed successfully!'),
-            backgroundColor: context.colors.success,
-          ),
-        );
-        // Optionally reset or navigate away
-        viewModel.reset();
+        // State is now handled by HomeViewModel.auditCompletedSuccessfully
+        // and shown in HomeView.buildSuccessView
       }
     }
   }
@@ -1153,7 +1145,8 @@ Future<bool?> _showVendorUpdateDialog(
           children: [
             RichText(
               text: TextSpan(
-                style: AppTheme.bodyMedium.copyWith(color: context.colors.textPrimary),
+                style: AppTheme.bodyMedium
+                    .copyWith(color: context.colors.textPrimary),
                 children: [
                   const TextSpan(text: 'You\'ve assigned '),
                   TextSpan(

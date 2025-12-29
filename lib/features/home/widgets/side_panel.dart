@@ -13,7 +13,7 @@ class SidePanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final viewModel = context.watch<HomeViewModel>();
 
-    return SingleChildScrollView(
+    return Padding(
       padding: const EdgeInsets.all(AppTheme.spacingLg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -33,7 +33,8 @@ class SidePanel extends StatelessWidget {
     );
   }
 
-  Widget _buildParticipantsSection(BuildContext context, HomeViewModel viewModel) {
+  Widget _buildParticipantsSection(
+      BuildContext context, HomeViewModel viewModel) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -169,7 +170,7 @@ class SidePanel extends StatelessWidget {
   }
 
   Widget _buildActionButton({
-    required BuildContext context,  
+    required BuildContext context,
     required String label,
     required String buttonLabel,
     required VoidCallback onPressed,
@@ -247,6 +248,7 @@ class SidePanel extends StatelessWidget {
       child: ContentBox(
         minimizedHeight: 60,
         initiallyMinimized: true,
+        expandContent: true,
         controls: [
           ContentBoxControl(
             action: ContentBoxAction.preview,
@@ -267,23 +269,22 @@ class SidePanel extends StatelessWidget {
           ),
         ],
         headerWidgets: [
-          Flexible(child: Text(
-            template.templateName,
-            style: AppTheme.bodyLarge.copyWith(
-              fontWeight: FontWeight.w600,
-            )
-          ))
+          Flexible(
+              child: Text(template.templateName,
+                  style: AppTheme.bodyLarge.copyWith(
+                    fontWeight: FontWeight.w600,
+                  )))
         ],
         previewWidgets: [
           // Template Name
           Text(
-              template.templateName,
-              style: AppTheme.bodyMedium.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-              overflow: TextOverflow.ellipsis,
+            template.templateName,
+            style: AppTheme.bodyMedium.copyWith(
+              fontWeight: FontWeight.w600,
             ),
-          
+            overflow: TextOverflow.ellipsis,
+          ),
+
           // Budget Amount or Current Status
           if (isCurrent)
             Container(
@@ -314,7 +315,8 @@ class SidePanel extends StatelessWidget {
           children: [
             Text(
               'Created: ${DateFormat('MMM d, yyyy').format(template.dateCreated)}',
-              style: AppTheme.bodySmall.copyWith(color: context.colors.textSecondary),
+              style: AppTheme.bodySmall
+                  .copyWith(color: context.colors.textSecondary),
             ),
             const SizedBox(height: AppTheme.spacingMd),
             ElevatedButton(

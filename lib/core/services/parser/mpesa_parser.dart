@@ -6,6 +6,11 @@ import 'package:uuid/uuid.dart';
 import '../../models/client_models.dart';
 import 'parser_interface.dart';
 
+/**
+ * Current implementation ignores all money in transactions
+ * TODO: move that logic to the parent so that all parsers can be toggled to accept
+ */ 
+
 class MPesaParser extends StatementParser {
   @override
   FinancialInstitution get institution => FinancialInstitution.mpesa;
@@ -117,14 +122,15 @@ class MPesaParser extends StatementParser {
       // Extract all text. The dotAll: true flag in the regex will handle multi-line parsing.
       String fullText = PdfTextExtractor(document).extractText();
       final uuid = const Uuid();
+      bool ignoreTransaction = false;
 
-      // 🛑 DEBUGGING: Use this to confirm the text is extracted.
+      // DEBUGGING: Use this to confirm the text is extracted.
       // print('--- RAW PDF EXTRACTED TEXT START ---');
       // print(fullText);
       // print('--- RAW PDF EXTRACTED TEXT END ---');
       // int times = 2;
 
-      // 🏆 NEW LOGIC: Iterate over all matches found in the entire document text (fullText).
+      //  NEW LOGIC: Iterate over all matches found in the entire document text (fullText).
       // The multi-line and dotAll flags allow a single transaction to span multiple lines.
       for (final match in _transactionRowPattern.allMatches(fullText)) {
         final rawDate = match.group(1)!;
@@ -140,23 +146,21 @@ class MPesaParser extends StatementParser {
 
         // Parse Amounts
         double paidIn = parseAmount(rawPaidIn) ?? 0.0;
-        double withdrawn = parseAmount(rawWithdrawn) ?? 0.0;
+        double amount = parseAmount(rawWithdrawn) ?? 0.0;
 
-        // Determine final amount (Income vs Expense)
-        double finalAmount = 0.0;
+        // ONLY PROCESS WITHDRAWALS (money out)
+        // Skip if no withdrawal occurred
+        if (amount <= 0) {
+          ignoreTransaction = true;
+        }else{
+          // It is a withdrawal
+          amount = -amount;
 
-        if (paidIn > 0) {
-          finalAmount = paidIn;
-        } else if (withdrawn > 0) {
-          finalAmount = -withdrawn; // Negate expenses
-        } else {
-          // Skip zero-value transactions
-          continue;
         }
+
 
         if (transactionDate == null) {
           print("Transaction parse error: date not found");
-
           continue;
         }
 
@@ -164,9 +168,10 @@ class MPesaParser extends StatementParser {
           id: uuid.v4(),
           date: transactionDate,
           vendorName: normalizeVendorName(rawDetails),
-          amount: finalAmount,
+          amount: amount,
           originalDescription: rawDetails,
-          useMemory: false,
+          ignoreTransaction: ignoreTransaction,
+          useMemory: true,
         ));
         //? Uncomment to sample output
         // if (times > 0) {

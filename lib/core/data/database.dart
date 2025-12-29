@@ -294,8 +294,8 @@ class AppDatabase extends _$AppDatabase {
   MigrationStrategy get migration {
     // Read the ENV variable from the loaded dotenv configuration.
     // Default to 'PRODUCTION' for safety if it's not set.
-    final isProduction = !context.AppContext()
-        .isProduction; //TODO: (REMOVE NEGATION) For some reason is production is always true, I need it as false
+    final isProduction = context.AppContext()
+        .isProduction; //TODO: Confirm that it actually recognizes the dev env
 
     return MigrationStrategy(
       onCreate: (Migrator m) async {

@@ -167,7 +167,7 @@ class EquityParser extends StatementParser {
           vendorName: normalizeVendorName(rawParticulars),
           amount: finalAmount,
           originalDescription: rawParticulars.trim(),
-          useMemory: false,
+          useMemory: true,
         ));
       }
 

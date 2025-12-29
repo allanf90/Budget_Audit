@@ -70,56 +70,23 @@ class _BudgetingViewState extends State<BudgetingView> {
                   return const Center(child: CircularProgressIndicator());
                 }
 
-                return LayoutBuilder(
-                  builder: (context, constraints) {
-                    // Mobile breakpoint
-                    final isMobile = constraints.maxWidth < 800;
-
-                    if (isMobile) {
-                      // Mobile: Header scrolls away with content
-                      return SingleChildScrollView(
+                return SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      const AppHeader(
+                        subtitle: 'Create and manage your budget templates',
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(AppTheme.spacingLg),
                         child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const AppHeader(
-                              subtitle:
-                                  'Create and manage your budget templates',
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(AppTheme.spacingLg),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _buildMainContainer(
-                                      context, viewModel, appContext),
-                                ],
-                              ),
-                            ),
+                            _buildMainContainer(context, viewModel, appContext),
                           ],
                         ),
-                      );
-                    } else {
-                      // Desktop: Header fixed at top
-                      return Column(
-                        children: [
-                          const AppHeader(
-                            subtitle: 'Create and manage your budget templates',
-                          ),
-                          Expanded(
-                            child: SingleChildScrollView(
-                              padding: const EdgeInsets.all(AppTheme.spacingLg),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _buildMainContainer(
-                                      context, viewModel, appContext),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      );
-                    }
-                  },
+                      ),
+                    ],
+                  ),
                 );
               },
             ),

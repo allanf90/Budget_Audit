@@ -225,7 +225,7 @@ class CustomParser implements StatementParser {
         date: DateTime.now().subtract(Duration(days: index * 2)),
         vendorName: 'Greggs PLC',
         amount: -2.90,
-        useMemory: false,
+        useMemory: true,
       ),
     );
   }

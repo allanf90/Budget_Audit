@@ -93,19 +93,21 @@ class ParsedTransaction extends Equatable {
   final AccountData? suggestedAccount;
   final MatchStatus? originalStatus;
   final bool autoUpdated;
+  final bool ignoreTransaction;
 
   const ParsedTransaction({
     required this.id,
     required this.date,
     required this.vendorName,
     required this.amount,
+    this.ignoreTransaction = false,
     this.originalDescription,
     this.userModified = false,
     this.vendorId,
     this.category,
     this.account,
     this.reason,
-    this.useMemory = false,
+    this.useMemory = true, //! Im thinking, let this be an opt out thing
     this.matchStatus = MatchStatus.critical,
     this.potentialMatches = const [],
     this.suggestedAccount,
