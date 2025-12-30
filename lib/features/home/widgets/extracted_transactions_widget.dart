@@ -63,24 +63,20 @@ class _ExtractedTransactionsWidgetState
 
     return ContentBox(
       initiallyMinimized: false,
-      previewWidgets: [
-        Text(
-          'Document ${viewModel.currentDocumentIndex + 1} of ${viewModel.totalDocuments}',
-          style: AppTheme.bodySmall,
-        ),
-        Text(
-          '${currentGroup.transactions.length} transactions',
-          style: AppTheme.bodySmall,
-        ),
-      ],
+      // previewWidgets: [
+      //   Text(
+      //     'Document ${viewModel.currentDocumentIndex + 1} of ${viewModel.totalDocuments}',
+      //     style: AppTheme.bodySmall,
+      //   ),
+      //   Text(
+      //     '${currentGroup.transactions.length} transactions',
+      //     style: AppTheme.bodySmall,
+      //   ),
+      // ],
       headerWidgets: [
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Navigation controls
-            _buildNavigationControls(viewModel),
-            //const SizedBox(height: 16),
-
             const Text('Verify extracted details', style: AppTheme.h3),
             const SizedBox(height: 8),
             Text(
@@ -101,9 +97,9 @@ class _ExtractedTransactionsWidgetState
           action: ContentBoxAction.delete,
           onPressed: () => _confirmDelete(context, viewModel),
         ),
-        ContentBoxControl(
-          action: ContentBoxAction.minimize,
-        ),
+        // ContentBoxControl(
+        //   action: ContentBoxAction.minimize,
+        // ),
       ],
       content: Column(
         children: [
@@ -113,6 +109,10 @@ class _ExtractedTransactionsWidgetState
           _buildTransactionGroups(
               context, viewModel, currentGroup.transactions),
           const SizedBox(height: 24),
+          // Navigation controls
+          _buildNavigationControls(viewModel),
+
+          const SizedBox(height: 16),
           _buildActionButtons(context, viewModel),
         ],
       ),
@@ -429,6 +429,8 @@ class _ExtractedTransactionsWidgetState
             transactions: criticalTxns,
             status: MatchStatus.critical,
             title: 'Your Input is Required',
+            description:
+                'The vendors are not recognized by the system. Your review is required to continue.',
             color: context.colors.error,
           ),
         if (criticalTxns.isNotEmpty) const SizedBox(height: 16),
@@ -439,6 +441,8 @@ class _ExtractedTransactionsWidgetState
             transactions: potentialTxns,
             status: MatchStatus.potential,
             title: 'Please review vendor names',
+            description:
+                'Vendor names resemble vendors you have interacted with. Consider reviewing to ensure accuracy',
             color: Colors.orange,
           ),
         if (potentialTxns.isNotEmpty) const SizedBox(height: 16),
@@ -449,6 +453,8 @@ class _ExtractedTransactionsWidgetState
             transactions: ambiguousTxns,
             status: MatchStatus.ambiguous,
             title: 'Review historical associations',
+            description:
+                'Transaction Vendors have been matched, but there exist differing historical associations. Consider reviewing for accuracy.',
             color: const Color(0xFF86EFAC),
           ),
         if (ambiguousTxns.isNotEmpty) const SizedBox(height: 16),
@@ -459,6 +465,8 @@ class _ExtractedTransactionsWidgetState
             transactions: confidentTxns,
             status: MatchStatus.confident,
             title: 'Verified transactions',
+            description:
+                'Transaction Vendors have been accurately matched. Consider reviewing for accuracy.',
             color: context.colors.success,
           ),
       ],
@@ -471,6 +479,7 @@ class _ExtractedTransactionsWidgetState
     required List<ParsedTransaction> transactions,
     required MatchStatus status,
     required String title,
+    required String description,
     required Color color,
   }) {
     final unmodifiedCount = transactions
@@ -482,13 +491,33 @@ class _ExtractedTransactionsWidgetState
     return ContentBox(
       initiallyMinimized: false,
       headerWidgets: [
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              '$title',
+              style: AppTheme.bodySmall
+                  .copyWith(color: context.colors.textSecondary),
+            ),
+            const SizedBox(width: 4),
+            Tooltip(
+              message: description,
+              triggerMode: TooltipTriggerMode.tap,
+              child: Icon(
+                Icons.info_outline,
+                size: 14,
+                color: context.colors.textSecondary,
+              ),
+            ),
+          ],
+        ),
         Text(
           'Total: ${transactions.length} transactions',
           style:
               AppTheme.bodySmall.copyWith(color: context.colors.textSecondary),
         ),
         Text(
-          '$unmodifiedCount ${unmodifiedCount == 1 ? 'transaction' : 'transactions remaining'}',
+          '$unmodifiedCount ${unmodifiedCount == 1 ? 'transaction remaining' : 'transactions remaining'}',
           style:
               AppTheme.bodySmall.copyWith(color: context.colors.textSecondary),
         ),
@@ -506,10 +535,27 @@ class _ExtractedTransactionsWidgetState
             ),
             const SizedBox(width: 8),
             Expanded(
-              child: Text(
-                title,
-                style:
-                    AppTheme.bodyMedium.copyWith(fontWeight: FontWeight.w600),
+              child: Row(
+                children: [
+                  Flexible(
+                    child: Text(
+                      title,
+                      style: AppTheme.bodyMedium
+                          .copyWith(fontWeight: FontWeight.w600),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Tooltip(
+                    message: description,
+                    triggerMode: TooltipTriggerMode.tap,
+                    child: Icon(
+                      Icons.info_outline,
+                      size: 14,
+                      color: context.colors.textSecondary,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

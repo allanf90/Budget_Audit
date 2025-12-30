@@ -264,7 +264,6 @@ class HomeViewModel extends ChangeNotifier {
           );
 
           // Record vendor match history if user wants to remember
-          debugPrint("User wants to use memory: ${transaction.useMemory}");
           if (transaction.useMemory) {
             await _budgetService.transactionService.recordVendorMatch(
               vendorId: vendorId,
@@ -559,13 +558,11 @@ class HomeViewModel extends ChangeNotifier {
 
       for (final transaction in transactions) {
         var matchStatus = MatchStatus.critical;
+        bool markAsAutoUpdated = false;
         List<String> potentialMatches = [];
         client_models.AccountData? suggestedAccount;
         String finalVendorName = transaction.vendorName;
         int? vendorId;
-
-        final originalStatus =
-            transaction.originalStatus ?? transaction.matchStatus;
 
         // Exact match
         final exactMatch = vendors
@@ -577,7 +574,8 @@ class HomeViewModel extends ChangeNotifier {
         if (exactMatch != null) {
           vendorId = exactMatch.vendorId;
           finalVendorName = exactMatch.vendorName;
-          debugPrint('Exact match found: ${exactMatch.vendorName}');
+          markAsAutoUpdated = true;
+          // debugPrint('Exact match found: ${exactMatch.vendorName}');
 
           final history = await _budgetService.transactionService
               .getVendorMatchHistory(exactMatch.vendorId);
@@ -610,9 +608,12 @@ class HomeViewModel extends ChangeNotifier {
               FuzzySearch.findSimilar(transaction.vendorName, vendorNames);
           if (potentialMatches.isNotEmpty) {
             matchStatus = MatchStatus.potential;
+            markAsAutoUpdated = true;
           }
         }
 
+        final originalStatus = transaction.originalStatus ?? matchStatus;
+        debugPrint('Match status: $matchStatus');
         updatedTransactions.add(transaction.copyWith(
           vendorName: finalVendorName,
           matchStatus: matchStatus,
@@ -622,7 +623,7 @@ class HomeViewModel extends ChangeNotifier {
           vendorId: vendorId,
           originalStatus: originalStatus,
           userModified: transaction.userModified,
-          autoUpdated: transaction.autoUpdated,
+          autoUpdated: markAsAutoUpdated,
         ));
       }
 
