@@ -149,7 +149,7 @@ class Transactions extends drift.Table {
 
   drift.IntColumn get accountId => integer().references(Accounts, #accountId)();
 
-//! BEWARE: This column is used to ignore MONEY IN/ DEPOSIT transactions
+//! BEWARE: In as much as money in transactions are flagged as ignored, they dont get commited to DB because they are never presented to the user during transaction labelling with accounts (and eventually saved). As such, this can be used for other purposes.
   drift.BoolColumn get isIgnored =>
       boolean().withDefault(const drift.Constant(false))();
 

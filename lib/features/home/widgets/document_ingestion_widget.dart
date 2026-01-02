@@ -64,12 +64,15 @@ class _DocumentIngestionWidgetState extends State<DocumentIngestionWidget> {
             _buildBrowseDocument(),
             const SizedBox(height: AppTheme.spacingMd),
 
-            // Password (optional)
-            _buildPasswordField(),
-            const SizedBox(height: AppTheme.spacingMd),
-
-            // Document Owner
-            _buildDocumentOwner(viewModel),
+            // Password and Document Owner in a Row
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: _buildPasswordField()),
+                const SizedBox(width: AppTheme.spacingMd),
+                Expanded(child: _buildDocumentOwner(viewModel)),
+              ],
+            ),
             const SizedBox(height: AppTheme.spacingMd),
 
             // Financial Institution
@@ -113,7 +116,7 @@ class _DocumentIngestionWidgetState extends State<DocumentIngestionWidget> {
         InkWell(
           onTap: _isPickingFile ? null : _pickFile,
           child: Container(
-            height: 120,
+            height: 80,
             decoration: BoxDecoration(
               color: context.colors.surface,
               border: Border.all(
@@ -179,15 +182,19 @@ class _DocumentIngestionWidgetState extends State<DocumentIngestionWidget> {
       children: [
         Row(
           children: [
-            Text(
-              'Document Password (if applicable)',
+            const Text(
+              'Document Password',
               style: AppTheme.label,
             ),
             const SizedBox(width: AppTheme.spacing2xs),
-            Icon(
-              Icons.info_outline,
-              size: 16,
-              color: context.colors.textSecondary,
+            Tooltip(
+              message:
+                  'Allows the software to read the document if it is password protected',
+              child: Icon(
+                Icons.info_outline,
+                size: 16,
+                color: context.colors.textSecondary,
+              ),
             ),
           ],
         ),
@@ -199,9 +206,6 @@ class _DocumentIngestionWidgetState extends State<DocumentIngestionWidget> {
             hintStyle: AppTheme.bodyMedium.copyWith(
               color: context.colors.textTertiary,
             ),
-            helperText:
-                'Allows the software to read the document if it is password protected',
-            helperStyle: AppTheme.caption,
           ),
           obscureText: true,
         ),
@@ -216,7 +220,7 @@ class _DocumentIngestionWidgetState extends State<DocumentIngestionWidget> {
         Row(
           children: [
             const Text(
-              'Select the document owner',
+              'Document Owner',
               style: AppTheme.label,
             ),
             const SizedBox(width: 4),
@@ -224,16 +228,22 @@ class _DocumentIngestionWidgetState extends State<DocumentIngestionWidget> {
               '*',
               style: AppTheme.label.copyWith(color: context.colors.error),
             ),
+            const SizedBox(width: AppTheme.spacing2xs),
+            Tooltip(
+              message:
+                  'Contents of the document shall be associated with this participant',
+              child: Icon(
+                Icons.info_outline,
+                size: 16,
+                color: context.colors.textSecondary,
+              ),
+            ),
           ],
-        ),
-        const SizedBox(height: AppTheme.spacingXs),
-        Text(
-          'Contents of the document shall be associated with this participant',
-          style: AppTheme.caption,
         ),
         const SizedBox(height: AppTheme.spacingXs),
         DropdownButtonFormField<int>(
           value: _selectedOwnerId,
+          isExpanded: true,
           decoration: InputDecoration(
             hintText: 'Owner',
             hintStyle: AppTheme.bodyMedium.copyWith(
@@ -242,7 +252,7 @@ class _DocumentIngestionWidgetState extends State<DocumentIngestionWidget> {
           ),
           validator: (value) {
             if (value == null) {
-              return 'Please select a document owner';
+              return 'Required';
             }
             return null;
           },
@@ -252,6 +262,7 @@ class _DocumentIngestionWidgetState extends State<DocumentIngestionWidget> {
               child: Text(
                 participant.nickname ?? participant.firstName,
                 style: AppTheme.bodyMedium,
+                overflow: TextOverflow.ellipsis,
               ),
             );
           }).toList(),

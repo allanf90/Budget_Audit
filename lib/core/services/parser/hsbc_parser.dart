@@ -692,6 +692,7 @@ class HSBCParser extends StatementParser {
       date: date,
       vendorName: normalizeVendorName(description),
       amount: isDR ? -amount.abs() : amount.abs(),
+      ignoreTransaction: isCR,
       originalDescription: description,
       useMemory: true,
     );

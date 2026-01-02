@@ -5,6 +5,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/content_box.dart';
 import '../home_viewmodel.dart';
 import 'read_only_category_widget.dart';
+import '../../../core/context.dart';
 
 class SidePanel extends StatelessWidget {
   const SidePanel({Key? key}) : super(key: key);
@@ -238,100 +239,106 @@ class SidePanel extends StatelessWidget {
     HomeViewModel viewModel,
     template,
   ) {
-    // TODO: Get actual budget amount if available in template model or fetch it
-    // For now using a placeholder or 0 if not available
-    final budgetAmount = '\$0.00';
-    final isCurrent = false; // TODO: Determine if current
+    // Determine if current
+    final isCurrent =
+        viewModel.currentTemplate?.templateId == template.templateId;
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppTheme.spacingMd),
-      child: ContentBox(
-        minimizedHeight: 60,
-        initiallyMinimized: true,
-        expandContent: true,
-        controls: [
-          ContentBoxControl(
-            action: ContentBoxAction.preview,
-            onPressed: () => _showPreview(context, viewModel, template),
-          ),
-          const ContentBoxControl(
-            action: ContentBoxAction.minimize,
-            // ContentBox handles toggle internally if we don't override onPressed,
-            // but we want to be explicit or let it handle it.
-            // If we pass onPressed, we might need to manage state.
-            // ContentBox default behavior for minimize/maximize is good.
-            // But we need to pass it to show the icon.
-          ),
-          ContentBoxControl(
-            action: ContentBoxAction.delete,
-            onPressed: () =>
-                _confirmDeleteTemplate(context, viewModel, template),
-          ),
-        ],
-        headerWidgets: [
-          Flexible(
-              child: Text(template.templateName,
-                  style: AppTheme.bodyLarge.copyWith(
-                    fontWeight: FontWeight.w600,
-                  )))
-        ],
-        previewWidgets: [
-          // Template Name
-          Text(
-            template.templateName,
-            style: AppTheme.bodyMedium.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-            overflow: TextOverflow.ellipsis,
-          ),
+    return FutureBuilder<double>(
+      future: viewModel.getTemplateTotalBudget(template.templateId),
+      builder: (context, snapshot) {
+        final budgetAmount = snapshot.hasData
+            ? '\$${snapshot.data!.toStringAsFixed(2)}'
+            : '\$0.00';
 
-          // Budget Amount or Current Status
-          if (isCurrent)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: context.colors.success.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(4),
+        return Padding(
+          padding: const EdgeInsets.only(bottom: AppTheme.spacingMd),
+          child: ContentBox(
+            minimizedHeight: 60,
+            initiallyMinimized: true,
+            expandContent: true,
+            controls: [
+              ContentBoxControl(
+                action: ContentBoxAction.preview,
+                onPressed: () => _showPreview(context, viewModel, template),
               ),
-              child: Text(
-                'Current',
-                style: AppTheme.caption.copyWith(
-                  color: context.colors.success,
+              const ContentBoxControl(
+                action: ContentBoxAction.minimize,
+              ),
+              ContentBoxControl(
+                action: ContentBoxAction.delete,
+                onPressed: () =>
+                    _confirmDeleteTemplate(context, viewModel, template),
+              ),
+            ],
+            headerWidgets: [
+              Flexible(
+                  child: Text(template.templateName,
+                      style: AppTheme.bodyLarge.copyWith(
+                        fontWeight: FontWeight.w600,
+                      )))
+            ],
+            previewWidgets: [
+              // Template Name
+              Text(
+                template.templateName,
+                style: AppTheme.bodyMedium.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
+                overflow: TextOverflow.ellipsis,
               ),
-            )
-          else
-            Text(
-              budgetAmount,
-              style: AppTheme.bodySmall.copyWith(
-                color: context.colors.textSecondary,
-                fontWeight: FontWeight.w500,
-              ),
+
+              // Budget Amount or Current Status
+              if (isCurrent)
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: context.colors.success.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    'Current',
+                    style: AppTheme.caption.copyWith(
+                      color: context.colors.success,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                )
+              else
+                Text(
+                  budgetAmount,
+                  style: AppTheme.bodySmall.copyWith(
+                    color: context.colors.textSecondary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+            ],
+            content: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Created: ${DateFormat('MMM d, yyyy').format(template.dateCreated)}',
+                  style: AppTheme.bodySmall
+                      .copyWith(color: context.colors.textSecondary),
+                ),
+                const SizedBox(height: AppTheme.spacingMd),
+                ElevatedButton(
+                  onPressed: () {
+                    // TODO: Implement adopt template
+                    Provider.of<AppContext>(context, listen: false)
+                        .setCurrentTemplate(template);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: context.colors.secondary,
+                    foregroundColor: context.colors.textPrimary,
+                  ),
+                  child: const Text('Adopt Template'),
+                ),
+              ],
             ),
-        ],
-        content: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'Created: ${DateFormat('MMM d, yyyy').format(template.dateCreated)}',
-              style: AppTheme.bodySmall
-                  .copyWith(color: context.colors.textSecondary),
-            ),
-            const SizedBox(height: AppTheme.spacingMd),
-            ElevatedButton(
-              onPressed: () {
-                // TODO: Implement adopt template
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: context.colors.secondary,
-                foregroundColor: context.colors.textPrimary,
-              ),
-              child: const Text('Adopt Template'),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 

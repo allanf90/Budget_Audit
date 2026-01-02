@@ -389,6 +389,11 @@ class HomeViewModel extends ChangeNotifier {
     }
   }
 
+  Future<double> getTemplateTotalBudget(int templateId) async {
+    return await _budgetService.accountService
+        .getTemplateTotalBudget(templateId);
+  }
+
   Future<void> refreshHistory() async {
     await loadParticipants();
     await loadTemplateHistory();

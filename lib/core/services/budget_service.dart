@@ -230,6 +230,25 @@ class AccountService {
     }
   }
 
+  /// Get total budget amount for a template
+  Future<double> getTemplateTotalBudget(int templateId) async {
+    try {
+      final query = _appDatabase.select(_appDatabase.accounts)
+        ..where((tbl) => tbl.templateId.equals(templateId));
+      final accounts = await query.get();
+
+      double total = 0.0;
+      for (final account in accounts) {
+        total += account.budgetAmount;
+      }
+      return total;
+    } catch (e, st) {
+      _logger.severe(
+          "Error calculating total budget for template $templateId", e, st);
+      return 0.0;
+    }
+  }
+
   Future<bool> modifyAccount(models.Account modifiedAccount) async {
     try {
       final update = AccountsCompanion(
@@ -448,8 +467,7 @@ class TransactionService {
     }
   }
 
-  
-/// Fetch all transactions for a list of account IDs
+  /// Fetch all transactions for a list of account IDs
   Future<List<models.Transaction>> getTransactionsForAccounts(
       List<int> accountIds) async {
     try {
