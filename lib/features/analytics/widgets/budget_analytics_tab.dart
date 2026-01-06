@@ -13,6 +13,59 @@ class BudgetAnalyticsTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<AnalyticsViewModel>();
+    if (viewModel.selectedTemplate == null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.account_balance_wallet_outlined,
+              size: 64,
+              color: context.colors.textTertiary,
+            ),
+            const SizedBox(height: AppTheme.spacingMd),
+            Text(
+              'No Active Budget Selected',
+              style: AppTheme.h3.copyWith(
+                color: context.colors.textSecondary,
+              ),
+            ),
+            const SizedBox(height: AppTheme.spacingSm),
+            RichText(
+              textAlign: TextAlign.center,
+              text: TextSpan(
+                style: AppTheme.bodyMedium.copyWith(
+                  color: context.colors.textSecondary,
+                ),
+                children: [
+                  const TextSpan(
+                      text: 'Please select a budget in the budget page or '),
+                  WidgetSpan(
+                    child: InkWell(
+                      onTap: () {
+                        // Placeholder for navigation or help dialog
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('Navigate to Budgeting Help...')),
+                        );
+                      },
+                      child: Text(
+                        'learn more about budgeting',
+                        style: AppTheme.bodyMedium.copyWith(
+                          color: context.colors.primary,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     final mediaQuery = MediaQuery.of(context);
     final isWideScreen = mediaQuery.size.width > 800;
 
@@ -291,6 +344,13 @@ class BudgetAnalyticsTab extends StatelessWidget {
       );
     }
 
+    // Calculate total budget for this category to determine percentages
+    final double totalCategoryBudget = selectedCategory.accounts
+        .fold(0.0, (sum, account) => sum + account.budgeted);
+
+    // Avoid division by zero
+    final double divisor = totalCategoryBudget > 0 ? totalCategoryBudget : 1.0;
+
     return Container(
       padding: const EdgeInsets.all(AppTheme.spacingLg),
       decoration: BoxDecoration(
@@ -338,10 +398,8 @@ class BudgetAnalyticsTab extends StatelessWidget {
                 return BarChart(
                   BarChartData(
                     alignment: BarChartAlignment.spaceAround,
-                    maxY: selectedCategory.accounts
-                            .map((a) => a.budgeted)
-                            .reduce((a, b) => a > b ? a : b) *
-                        1.2,
+                    // Max Y is slightly over 100% to leave room at top
+                    maxY: 105,
                     barTouchData: BarTouchData(
                       touchTooltipData: BarTouchTooltipData(
                         getTooltipColor: (_) => context.colors.surfaceVariant,
@@ -359,7 +417,22 @@ class BudgetAnalyticsTab extends StatelessWidget {
                             ),
                             children: [
                               TextSpan(
-                                text: formatter.format(rod.toY),
+                                text:
+                                    '${(account.budgeted / totalCategoryBudget * 100).toStringAsFixed(2)}%\n',
+                                style: AppTheme.bodySmall.copyWith(
+                                  color: context.colors.textSecondary,
+                                ),
+                              ),
+                              TextSpan(
+                                text:
+                                    'Amount: ${formatter.format(account.budgeted)}\n',
+                                style: AppTheme.bodySmall.copyWith(
+                                  color: context.colors.textSecondary,
+                                ),
+                              ),
+                              TextSpan(
+                                text:
+                                    'Total: ${formatter.format(totalCategoryBudget)}',
                                 style: AppTheme.bodySmall.copyWith(
                                   color: context.colors.textSecondary,
                                 ),
@@ -406,9 +479,9 @@ class BudgetAnalyticsTab extends StatelessWidget {
                           showTitles: true,
                           reservedSize: 50,
                           getTitlesWidget: (value, meta) {
-                            final formatter = NumberFormat.compact();
+                            // Display as integer percentage (0, 20, 40...)
                             return Text(
-                              formatter.format(value),
+                              value.toInt().toString(),
                               style: AppTheme.caption.copyWith(
                                 color: context.colors.textSecondary,
                               ),
@@ -426,7 +499,7 @@ class BudgetAnalyticsTab extends StatelessWidget {
                     gridData: FlGridData(
                       show: true,
                       drawVerticalLine: false,
-                      horizontalInterval: null,
+                      horizontalInterval: 20, // Grid lines every 20%
                       getDrawingHorizontalLine: (value) {
                         return FlLine(
                           color: context.colors.border,
@@ -435,7 +508,8 @@ class BudgetAnalyticsTab extends StatelessWidget {
                       },
                     ),
                     borderData: FlBorderData(show: false),
-                    barGroups: _buildBarGroups(selectedCategory, barWidth),
+                    barGroups:
+                        _buildBarGroups(selectedCategory, barWidth, divisor),
                   ),
                 );
               },
@@ -447,16 +521,18 @@ class BudgetAnalyticsTab extends StatelessWidget {
   }
 
   List<BarChartGroupData> _buildBarGroups(
-      CategorySpendingData category, double barWidth) {
+      CategorySpendingData category, double barWidth, double totalBudget) {
     return List.generate(
       category.accounts.length,
       (index) {
         final account = category.accounts[index];
+        final percentage = (account.budgeted / totalBudget) * 100;
+
         return BarChartGroupData(
           x: index,
           barRods: [
             BarChartRodData(
-              toY: account.budgeted,
+              toY: percentage,
               color: account.account.color,
               width: barWidth,
               borderRadius: const BorderRadius.only(

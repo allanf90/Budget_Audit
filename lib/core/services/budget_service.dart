@@ -443,6 +443,24 @@ class CategoryService {
     }
   }
 
+  Future<bool> updateCategory(models.Category category) async {
+    try {
+      final updated = await (_appDatabase.update(_appDatabase.categories)
+            ..where((t) => t.categoryId.equals(category.categoryId)))
+          .write(CategoriesCompanion(
+        categoryName: drift.Value(category.categoryName),
+        colorHex: drift.Value(category.colorHex),
+        templateId: drift.Value(category.templateId),
+      ));
+
+      _logger.info("Updated category ${category.categoryId} ($updated rows)");
+      return updated > 0;
+    } catch (e, st) {
+      _logger.severe("Error updating category ${category.categoryId}", e, st);
+      return false;
+    }
+  }
+
   Future<bool> deleteCategory(int categoryId) async {
     try {
       // First, delete all accounts in this category
