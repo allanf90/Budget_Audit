@@ -85,6 +85,7 @@ class AppRouter {
             return ChangeNotifierProvider(
               create: (_) => AnalyticsViewModel(
                 budgetService: sl<BudgetService>(),
+                participantService: sl<ParticipantService>(),
                 appContext: appContext,
               ),
               child: const AnalyticsView(),
