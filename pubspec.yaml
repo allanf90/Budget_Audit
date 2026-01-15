@@ -92,6 +92,9 @@ flutter:
     - assets/images/logo.png
     - assets/images/logo-update.png
     - assets/images/splash-screen.png
+
+    - assets/budget_presets/family_budget.yaml
+    - assets/budget_presets/student_budget.yaml
     - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see

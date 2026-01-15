@@ -1,0 +1,198 @@
+# Family Budget Preset
+# Targeted at young families with children
+# Monthly budget totaling approximately 5,000 KES
+
+name: "Family Budget"
+description: "A comprehensive budget template for young families"
+targetAudience: "Young families with children"
+period: "Monthly"
+totalBudget: 5000
+
+categories:
+  - name: "Housing"
+    color: "Coral Red"
+    accounts:
+      - name: "Rent"
+        budget: 5000
+      - name: "Electricity & Gas"
+        budget: 0
+      - name: "Council Tax"
+        budget: 0
+      - name: "Water"
+        budget: 0
+      - name: "Insurance"
+        budget: 0
+
+  - name: "Giving and Ministry"
+    color: "Mint Green"
+    accounts:
+      - name: "Missionary Support"
+        budget: 0
+      - name: "Missionary Home"
+        budget: 0
+      - name: "Gifts & Donations"
+        budget: 0
+      - name: "Tithes and Offerings"
+        budget: 0
+      - name: "Church Activities"
+        budget: 0
+
+  - name: "Savings"
+    color: "Strong Blue"
+    accounts:
+      - name: "Personal Savings Account"
+        budget: 0
+      - name: "Joint Savings Account"
+        budget: 0
+      - name: "Family Savings"
+        budget: 0
+      - name: "Emergency Savings"
+        budget: 0
+      - name: "Special Project Savings"
+        budget: 0
+      - name: "Annual Expenditure Fund"
+        budget: 0
+      - name: "Challenge Savings"
+        budget: 0
+
+  - name: "Education and Career"
+    color: "Purple"
+    accounts:
+      - name: "School Fees and Certifications"
+        budget: 0
+      - name: "Professional Development"
+        budget: 0
+
+  - name: "Food and Shopping"
+    color: "Orange"
+    accounts:
+      - name: "Supermarket"
+        budget: 0
+      - name: "Meat"
+        budget: 0
+      - name: "Wholesale"
+        budget: 0
+      - name: "Vegetable and Fruit"
+        budget: 0
+      - name: "Medicine"
+        budget: 0
+
+  - name: "Travel"
+    color: "Sky Blue"
+    accounts:
+      - name: "Accommodation"
+        budget: 0
+      - name: "Train Ticket"
+        budget: 0
+      - name: "Bus Fare"
+        budget: 0
+      - name: "Meals"
+        budget: 0
+
+  - name: "Personal Allowance"
+    color: "Pink"
+    accounts:
+      - name: "Individual Allowance 1"
+        budget: 0
+      - name: "Individual Allowance 2"
+        budget: 0
+
+  - name: "Family Transport"
+    color: "Teal"
+    accounts:
+      - name: "Monthly Bus Fare"
+        budget: 0
+      - name: "Daily Commute"
+        budget: 0
+      - name: "Ride Share"
+        budget: 0
+
+  - name: "Loans"
+    color: "Grey Blue"
+    accounts:
+      - name: "Loan Repayment"
+        budget: 0
+
+  - name: "Family Responsibility"
+    color: "Amethyst"
+    accounts:
+      - name: "Parents Support"
+        budget: 0
+      - name: "Parents Health Insurance"
+        budget: 0
+      - name: "Siblings Support"
+        budget: 0
+      - name: "Children School Fees"
+        budget: 0
+      - name: "Birthday Gifts"
+        budget: 0
+
+  - name: "Celebrations"
+    color: "Sunflower Yellow"
+    accounts:
+      - name: "Dates & Meetups"
+        budget: 0
+      - name: "Birthday Celebrations"
+        budget: 0
+      - name: "Anniversary Celebration"
+        budget: 0
+      - name: "Holiday Budget"
+        budget: 0
+
+  - name: "Entertainment"
+    color: "Cyan"
+    accounts:
+      - name: "Miscellaneous"
+        budget: 0
+      - name: "Internet & Airtime"
+        budget: 0
+      - name: "Streaming Services"
+        budget: 0
+      - name: "TV Licence"
+        budget: 0
+
+  - name: "Hair and Grooming"
+    color: "Purple"
+    accounts:
+      - name: "Hair & Nails"
+        budget: 0
+      - name: "Clothing & Shoes"
+        budget: 0
+
+  - name: "Personal Development"
+    color: "Mint Green"
+    accounts:
+      - name: "Therapy"
+        budget: 0
+      - name: "Music Class"
+        budget: 0
+      - name: "Gym"
+        budget: 0
+
+  - name: "Meals"
+    color: "Orange"
+    accounts:
+      - name: "Breakfast"
+        budget: 0
+      - name: "Lunch"
+        budget: 0
+      - name: "Dinner"
+        budget: 0
+
+  - name: "Healthcare"
+    color: "Coral Red"
+    accounts:
+      - name: "Medical Registration"
+        budget: 0
+      - name: "Professional Indemnity"
+        budget: 0
+      - name: "Practice Licence"
+        budget: 0
+      - name: "Professional Association Fees"
+        budget: 0
+
+  - name: "VISA Renewal"
+    color: "Strong Blue"
+    accounts:
+      - name: "VISA Renewal Fees"
+        budget: 0

@@ -1,0 +1,78 @@
+# Student Budget Preset
+# Targeted at Kenyan college students
+# Monthly budget totaling approximately 5,000 KES
+
+name: "Student Budget"
+description: "A practical budget template for Kenyan college students"
+targetAudience: "Kenyan college students"
+period: "Monthly"
+totalBudget: 5000
+
+categories:
+  - name: "Accommodation"
+    color: "Coral Red"
+    accounts:
+      - name: "Rent"
+        budget: 1500
+      - name: "Utilities"
+        budget: 200
+
+  - name: "Food"
+    color: "Orange"
+    accounts:
+      - name: "Groceries"
+        budget: 800
+      - name: "Breakfast"
+        budget: 300
+      - name: "Kwa Mathe (Takeout)"
+        budget: 400
+
+  - name: "Transport"
+    color: "Sky Blue"
+    accounts:
+      - name: "Daily Commute"
+        budget: 500
+      - name: "Occasional Travel"
+        budget: 200
+
+  - name: "Communication"
+    color: "Cyan"
+    accounts:
+      - name: "Airtime"
+        budget: 300
+      - name: "Internet Bundles"
+        budget: 200
+
+  - name: "Education"
+    color: "Purple"
+    accounts:
+      - name: "Books & Stationery"
+        budget: 300
+      - name: "Printing & Photocopying"
+        budget: 100
+
+  - name: "Personal Care"
+    color: "Pink"
+    accounts:
+      - name: "Clothes"
+        budget: 300
+      - name: "Grooming"
+        budget: 150
+
+  - name: "Entertainment"
+    color: "Sunflower Yellow"
+    accounts:
+      - name: "Social Activities"
+        budget: 200
+      - name: "Movies & Events"
+        budget: 100
+
+  - name: "Miscellaneous"
+    color: "Mint Green"
+    accounts:
+      - name: "Emergency Fund"
+        budget: 250
+      - name: "Personal Items"
+        budget: 200
+      - name: "Health & Medical"
+        budget: 200

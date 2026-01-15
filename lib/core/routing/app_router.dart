@@ -1,5 +1,6 @@
 import 'package:budget_audit/core/services/budget_service.dart';
 import 'package:budget_audit/core/services/document_service.dart';
+import 'package:budget_audit/core/services/preset_service.dart';
 import 'package:budget_audit/features/analytics/analytics_view.dart';
 import 'package:budget_audit/features/analytics/analytics_viewmodel.dart';
 import 'package:budget_audit/features/budgeting/budgeting_view.dart';
@@ -51,6 +52,7 @@ class AppRouter {
               create: (_) => BudgetingViewModel(
                 sl<BudgetService>(),
                 sl<ParticipantService>(),
+                sl<PresetService>(),
                 Provider.of<AppContext>(context, listen: false),
               ),
               child: const BudgetingView(),
