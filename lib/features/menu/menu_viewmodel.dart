@@ -57,7 +57,7 @@ class MenuViewModel extends ChangeNotifier {
         case '/dev':
           // Only available if NOT in production
           return _appContext.isProduction ==
-              true; //TODO: remember to change this to actually check env for app state
+              false; 
         case '/home':
           // Only show home after a valid session is established
           return _appContext.hasValidSession;

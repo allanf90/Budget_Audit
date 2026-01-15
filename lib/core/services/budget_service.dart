@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:logging/logging.dart';
 import '../models/models.dart' as models;
-import '../models/client_models.dart' as clientModels;
+import '../models/client_models.dart' as client_models;
 import '../data/database.dart';
 import 'package:drift/drift.dart' as drift;
 // import 'transaction_service.dart';
@@ -77,7 +77,7 @@ class TemplateService {
     }
   }
 
-  Future<int?> createTemplate(clientModels.Template newTemplate) async {
+  Future<int?> createTemplate(client_models.Template newTemplate) async {
     const int? timesUsed = 0;
     try {
       final entry = TemplatesCompanion.insert(
@@ -118,22 +118,59 @@ class TemplateService {
   }
 
   Future<bool> deleteTemplate(int templateId) async {
-    try {
-      // Cascade delete accounts linked to this template
-      await (_appDatabase.delete(_appDatabase.accounts)
-            ..where((tbl) => tbl.templateId.equals(templateId)))
-          .go();
+    return _appDatabase.transaction(() async {
+      try {
+        // 0. Fetch Account IDs to clean up their children
+        final accounts = await (_appDatabase.select(_appDatabase.accounts)
+              ..where((tbl) => tbl.templateId.equals(templateId)))
+            .get();
+        final accountIds = accounts.map((a) => a.accountId).toList();
 
-      final deleted = await (_appDatabase.delete(_appDatabase.templates)
-            ..where((tbl) => tbl.templateId.equals(templateId)))
-          .go();
+        if (accountIds.isNotEmpty) {
+          // 0a. Delete Transactions linked to these accounts
+          await (_appDatabase.delete(_appDatabase.transactions)
+                ..where((tbl) => tbl.accountId.isIn(accountIds)))
+              .go();
 
-      _logger.info("Deleted template $templateId ($deleted rows)");
-      return deleted > 0;
-    } catch (e, st) {
-      _logger.severe("Error deleting template $templateId", e, st);
-      return false;
-    }
+          // 0b. Delete VendorMatchHistories linked to these accounts
+          await (_appDatabase.delete(_appDatabase.vendorMatchHistories)
+                ..where((tbl) => tbl.accountId.isIn(accountIds)))
+              .go();
+        }
+
+        // 1. Delete Accounts
+        await (_appDatabase.delete(_appDatabase.accounts)
+              ..where((tbl) => tbl.templateId.equals(templateId)))
+            .go();
+
+        // 2. Delete Categories
+        await (_appDatabase.delete(_appDatabase.categories)
+              ..where((tbl) => tbl.templateId.equals(templateId)))
+            .go();
+
+        // 3. Delete Template Participants
+        await (_appDatabase.delete(_appDatabase.templateParticipants)
+              ..where((tbl) => tbl.templateId.equals(templateId)))
+            .go();
+
+        // 4. Delete Chart Snapshots
+        await (_appDatabase.delete(_appDatabase.chartSnapshots)
+              ..where((tbl) => tbl.associatedTemplate.equals(templateId)))
+            .go();
+
+        // 5. Finally, delete the Template
+        final deleted = await (_appDatabase.delete(_appDatabase.templates)
+              ..where((tbl) => tbl.templateId.equals(templateId)))
+            .go();
+
+        _logger.info("Deleted template $templateId and all dependencies");
+        return deleted > 0;
+      } catch (e, st) {
+        _logger.severe("Error deleting template $templateId", e, st);
+        // Rethrow to rollback transaction
+        throw e;
+      }
+    });
   }
 }
 
@@ -230,6 +267,25 @@ class AccountService {
     }
   }
 
+  /// Get total budget amount for a template
+  Future<double> getTemplateTotalBudget(int templateId) async {
+    try {
+      final query = _appDatabase.select(_appDatabase.accounts)
+        ..where((tbl) => tbl.templateId.equals(templateId));
+      final accounts = await query.get();
+
+      double total = 0.0;
+      for (final account in accounts) {
+        total += account.budgetAmount;
+      }
+      return total;
+    } catch (e, st) {
+      _logger.severe(
+          "Error calculating total budget for template $templateId", e, st);
+      return 0.0;
+    }
+  }
+
   Future<bool> modifyAccount(models.Account modifiedAccount) async {
     try {
       final update = AccountsCompanion(
@@ -265,7 +321,7 @@ class AccountService {
     }
   }
 
-  Future<int?> createAccount(clientModels.Account newAccount) async {
+  Future<int?> createAccount(client_models.Account newAccount) async {
     try {
       final entry = AccountsCompanion.insert(
         categoryId: newAccount.categoryId,
@@ -369,7 +425,7 @@ class CategoryService {
     }
   }
 
-  Future<int?> createCategory(clientModels.Category newCategory) async {
+  Future<int?> createCategory(client_models.Category newCategory) async {
     print(
         "Attempting to create category. Details:\n Name: ${newCategory.categoryName} \n Template ID: ${newCategory.templateId} \n Color: ${newCategory.colorHex}");
     try {
@@ -384,6 +440,24 @@ class CategoryService {
     } catch (e, st) {
       _logger.severe("Error creating category", e, st);
       return null;
+    }
+  }
+
+  Future<bool> updateCategory(models.Category category) async {
+    try {
+      final updated = await (_appDatabase.update(_appDatabase.categories)
+            ..where((t) => t.categoryId.equals(category.categoryId)))
+          .write(CategoriesCompanion(
+        categoryName: drift.Value(category.categoryName),
+        colorHex: drift.Value(category.colorHex),
+        templateId: drift.Value(category.templateId),
+      ));
+
+      _logger.info("Updated category ${category.categoryId} ($updated rows)");
+      return updated > 0;
+    } catch (e, st) {
+      _logger.severe("Error updating category ${category.categoryId}", e, st);
+      return false;
     }
   }
 
@@ -448,8 +522,7 @@ class TransactionService {
     }
   }
 
-  
-/// Fetch all transactions for a list of account IDs
+  /// Fetch all transactions for a list of account IDs
   Future<List<models.Transaction>> getTransactionsForAccounts(
       List<int> accountIds) async {
     try {
