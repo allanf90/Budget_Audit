@@ -1,78 +1,57 @@
-# Student Budget Preset
-# Targeted at Kenyan college students
-# Monthly budget totaling approximately 5,000 KES
+# Student Budget Preset (Kenya – Hustler Mode)
+# Monthly budget ~18,000 KES
 
 name: "Student Budget"
-description: "A practical budget template for Kenyan college students"
+description: "Budget for Kenyan college students"
 targetAudience: "Kenyan college students"
 period: "Monthly"
-totalBudget: 5000
+totalBudget: 18000
 
 categories:
-  - name: "Accommodation"
+  - name: "Accommodation & Utilities"
     color: "Coral Red"
     accounts:
       - name: "Rent"
-        budget: 1500
-      - name: "Utilities"
-        budget: 200
+        budget: 10000
+      - name: "Water"
+        budget: 1000
+      - name: "Wi-Fi"
+        budget: 1000
 
   - name: "Food"
     color: "Orange"
     accounts:
       - name: "Groceries"
-        budget: 800
-      - name: "Breakfast"
-        budget: 300
-      - name: "Kwa Mathe (Takeout)"
-        budget: 400
+        budget: 3000
+      - name: "Kwa Mathe"
+        budget: 1500
 
   - name: "Transport"
     color: "Sky Blue"
     accounts:
       - name: "Daily Commute"
-        budget: 500
-      - name: "Occasional Travel"
-        budget: 200
+        budget: 800
 
   - name: "Communication"
     color: "Cyan"
     accounts:
-      - name: "Airtime"
-        budget: 300
-      - name: "Internet Bundles"
-        budget: 200
+      - name: "Airtime & Mobile Data"
+        budget: 500
 
   - name: "Education"
     color: "Purple"
     accounts:
-      - name: "Books & Stationery"
-        budget: 300
-      - name: "Printing & Photocopying"
-        budget: 100
+      - name: "Printing & Stationery"
+        budget: 400
 
   - name: "Personal Care"
     color: "Pink"
     accounts:
-      - name: "Clothes"
+      - name: "Grooming & Essentials"
         budget: 300
-      - name: "Grooming"
-        budget: 150
 
-  - name: "Entertainment"
-    color: "Sunflower Yellow"
-    accounts:
-      - name: "Social Activities"
-        budget: 200
-      - name: "Movies & Events"
-        budget: 100
-
-  - name: "Miscellaneous"
+  - name: "Emergency"
     color: "Mint Green"
     accounts:
-      - name: "Emergency Fund"
-        budget: 250
-      - name: "Personal Items"
-        budget: 200
-      - name: "Health & Medical"
-        budget: 200
+      - name: "Emergency Buffer"
+        budget: 500

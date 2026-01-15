@@ -46,7 +46,8 @@ class BudgetingViewModel extends ChangeNotifier {
   AccountService get accountService => _budgetService.accountService;
   ParticipantService get participantService => _participantService;
 
-  List<clientModels.CategoryData> get categories => _filteredAndSortedCategories();
+  List<clientModels.CategoryData> get categories =>
+      _filteredAndSortedCategories();
   List<models.Participant> get allParticipants => _allParticipants;
   List<models.Template> get templates => _templates;
   List<BudgetPreset> get availablePresets => _availablePresets;
@@ -274,10 +275,38 @@ class BudgetingViewModel extends ChangeNotifier {
   }
 
   /// Adopt a preset and convert it to categories
-  void adoptPreset(BudgetPreset preset) {
+  void adoptPreset(
+    BudgetPreset preset, {
+    String? period,
+    int? customMonths,
+  }) {
     clearFilters();
 
+    // If period is provided, update the view model's selected period
+    if (period != null) {
+      if (period == 'Custom' && customMonths != null) {
+        _selectedPeriod = 'Custom';
+        _customPeriodMonths = customMonths;
+      } else if (periodOptions.contains(period)) {
+        _selectedPeriod = period;
+        if (period != 'Custom') {
+          _customPeriodMonths = 1; // Reset custom months if not custom
+        }
+      }
+    } else {
+      // Default to preset's period if not explicitly chosen (though UI should always send it now)
+      // If preset period is weird, default to Monthly
+      if (periodOptions.contains(preset.period)) {
+        _selectedPeriod = preset.period;
+      } else if (preset.period.startsWith('Custom')) {
+        _selectedPeriod = 'Monthly'; // Fallback
+      } else {
+        _selectedPeriod = 'Monthly';
+      }
+    }
+
     // Calculate the multiplier based on selected period vs preset period
+    // Note: We use the newly set _selectedPeriod and _customPeriodMonths
     final multiplier = _presetService.calculatePeriodMultiplier(
       preset.period,
       _selectedPeriod,
@@ -285,14 +314,16 @@ class BudgetingViewModel extends ChangeNotifier {
     );
 
     // Scale the preset if needed
-    final scaledPreset = multiplier != 1.0 ? preset.scaleByMultiplier(multiplier) : preset;
+    final scaledPreset =
+        multiplier != 1.0 ? preset.scaleByMultiplier(multiplier) : preset;
 
     // Convert preset categories to CategoryData
     final newCategories = <clientModels.CategoryData>[];
 
     for (var presetCategory in scaledPreset.categories) {
-      final categoryColor = _presetService.getColorFromName(presetCategory.colorName) 
-          ?? _generateRandomColor();
+      final categoryColor =
+          _presetService.getColorFromName(presetCategory.colorName) ??
+              _generateRandomColor();
 
       final accounts = <clientModels.AccountData>[];
       for (var presetAccount in presetCategory.accounts) {
@@ -349,7 +380,8 @@ class BudgetingViewModel extends ChangeNotifier {
         return account.copyWith(color: _generateLighterShade(newColor));
       }).toList();
 
-      _categories[index] = _categories[index].copyWith(accounts: updatedAccounts);
+      _categories[index] =
+          _categories[index].copyWith(accounts: updatedAccounts);
       notifyListeners();
     }
   }
@@ -385,7 +417,8 @@ class BudgetingViewModel extends ChangeNotifier {
 
       if (accIndex != -1) {
         final updatedAccounts = [...category.accounts];
-        updatedAccounts[accIndex] = updatedAccounts[accIndex].copyWith(name: newName);
+        updatedAccounts[accIndex] =
+            updatedAccounts[accIndex].copyWith(name: newName);
         _categories[catIndex] = category.copyWith(accounts: updatedAccounts);
         notifyListeners();
       }
@@ -400,7 +433,8 @@ class BudgetingViewModel extends ChangeNotifier {
 
       if (accIndex != -1) {
         final updatedAccounts = [...category.accounts];
-        updatedAccounts[accIndex] = updatedAccounts[accIndex].copyWith(budgetAmount: amount);
+        updatedAccounts[accIndex] =
+            updatedAccounts[accIndex].copyWith(budgetAmount: amount);
         _categories[catIndex] = category.copyWith(accounts: updatedAccounts);
         notifyListeners();
       }
@@ -432,7 +466,8 @@ class BudgetingViewModel extends ChangeNotifier {
     final catIndex = _categories.indexWhere((c) => c.id == categoryId);
     if (catIndex != -1) {
       final category = _categories[catIndex];
-      final updatedAccounts = category.accounts.where((a) => a.id != accountId).toList();
+      final updatedAccounts =
+          category.accounts.where((a) => a.id != accountId).toList();
       _categories[catIndex] = category.copyWith(accounts: updatedAccounts);
       notifyListeners();
     }
@@ -506,7 +541,8 @@ class BudgetingViewModel extends ChangeNotifier {
         period: periodString,
       );
 
-      final templateId = await _budgetService.templateService.createTemplate(newTemplate);
+      final templateId =
+          await _budgetService.templateService.createTemplate(newTemplate);
       if (templateId == null) {
         throw Exception('Failed to create template');
       }
@@ -518,7 +554,8 @@ class BudgetingViewModel extends ChangeNotifier {
           templateId: templateId,
         );
 
-        final categoryId = await _budgetService.categoryService.createCategory(newCategory);
+        final categoryId =
+            await _budgetService.categoryService.createCategory(newCategory);
         if (categoryId == null) {
           throw Exception('Failed to create category: ${category.name}');
         }
@@ -541,7 +578,8 @@ class BudgetingViewModel extends ChangeNotifier {
         }
       }
 
-      final createdTemplate = await _budgetService.templateService.getTemplate(templateId);
+      final createdTemplate =
+          await _budgetService.templateService.getTemplate(templateId);
       if (createdTemplate != null) {
         await setNewTemplateAsCurrent(createdTemplate);
       } else {
@@ -606,7 +644,8 @@ class BudgetingViewModel extends ChangeNotifier {
         dateCreated: DateTime.now(),
       );
 
-      final success = await _budgetService.templateService.updateTemplate(templateUpdateData);
+      final success = await _budgetService.templateService
+          .updateTemplate(templateUpdateData);
 
       if (!success) {
         throw Exception('Failed to update template details');
@@ -624,7 +663,8 @@ class BudgetingViewModel extends ChangeNotifier {
           .toList();
 
       for (var category in categoriesToDelete) {
-        await _budgetService.categoryService.deleteCategory(category.categoryId);
+        await _budgetService.categoryService
+            .deleteCategory(category.categoryId);
       }
 
       for (var categoryData in _categories) {
@@ -654,7 +694,8 @@ class BudgetingViewModel extends ChangeNotifier {
               .toList();
 
           for (var account in accountsToDelete) {
-            await _budgetService.accountService.deleteAccount(account.accountId);
+            await _budgetService.accountService
+                .deleteAccount(account.accountId);
           }
 
           for (var accountData in categoryData.accounts) {
@@ -677,7 +718,8 @@ class BudgetingViewModel extends ChangeNotifier {
                     : null,
                 dateCreated: existingAccount.dateCreated,
               );
-              await _budgetService.accountService.modifyAccount(modifiedAccount);
+              await _budgetService.accountService
+                  .modifyAccount(modifiedAccount);
             } else {
               final newAccount = clientModels.Account(
                 categoryId: categoryIdInt,
@@ -701,7 +743,8 @@ class BudgetingViewModel extends ChangeNotifier {
             templateId: templateId,
           );
 
-          final newCategoryId = await _budgetService.categoryService.createCategory(newCategory);
+          final newCategoryId =
+              await _budgetService.categoryService.createCategory(newCategory);
 
           if (newCategoryId == null) {
             throw Exception('Failed to create category: ${categoryData.name}');
@@ -728,7 +771,8 @@ class BudgetingViewModel extends ChangeNotifier {
 
       _isLoading = false;
 
-      final updatedTemplate = await _budgetService.templateService.getTemplate(templateId);
+      final updatedTemplate =
+          await _budgetService.templateService.getTemplate(templateId);
       if (updatedTemplate != null) {
         await _loadTemplateForEditing(updatedTemplate);
 
@@ -748,7 +792,8 @@ class BudgetingViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> adoptTemplate(models.Template template, int participantId) async {
+  Future<void> adoptTemplate(
+      models.Template template, int participantId) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -768,7 +813,8 @@ class BudgetingViewModel extends ChangeNotifier {
 
   Future<void> deleteTemplate(int templateId) async {
     try {
-      final success = await _budgetService.templateService.deleteTemplate(templateId);
+      final success =
+          await _budgetService.templateService.deleteTemplate(templateId);
       if (success) {
         _templates.removeWhere((t) => t.templateId == templateId);
         notifyListeners();
@@ -825,7 +871,8 @@ class BudgetingViewModel extends ChangeNotifier {
           comparison = a.totalBudget.compareTo(b.totalBudget);
           break;
         case FilterType.participant:
-          comparison = a.allParticipants.length.compareTo(b.allParticipants.length);
+          comparison =
+              a.allParticipants.length.compareTo(b.allParticipants.length);
           break;
         case FilterType.color:
           comparison = a.color.value.compareTo(b.color.value);

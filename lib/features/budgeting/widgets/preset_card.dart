@@ -3,15 +3,93 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/models/preset_models.dart';
 import 'package:intl/intl.dart';
 
-class PresetCard extends StatelessWidget {
+class PresetCard extends StatefulWidget {
   final BudgetPreset preset;
-  final VoidCallback onAdopt;
+  final Function(BudgetPreset, String, int) onAdopt;
 
   const PresetCard({
     Key? key,
     required this.preset,
     required this.onAdopt,
   }) : super(key: key);
+
+  @override
+  State<PresetCard> createState() => _PresetCardState();
+}
+
+class _PresetCardState extends State<PresetCard> {
+  late String _selectedPeriod;
+  late double _calculatedTotal; // To store the locally calculated total
+  int _customMonths = 1;
+
+  final List<String> _periodOptions = [
+    'Monthly',
+    'Quarterly',
+    'Semi-Annually',
+    'Annually',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedPeriod = widget.preset.period;
+    if (!_periodOptions.contains(_selectedPeriod) &&
+        _selectedPeriod != 'Custom') {
+      // If the preset has a weird period not in our standard list, just treat it as is or default to Monthly?
+      // For now, let's trust the preset or default to Monthly if it's really weird.
+      if (widget.preset.period.startsWith('Custom')) {
+        _selectedPeriod = 'Monthly'; // Fallback
+      }
+    }
+    _recalculateTotal();
+  }
+
+  void _recalculateTotal() {
+    // Crude multiplier logic here or import service?
+    // Since we don't have easy injection here without provider lookups,
+    // let's do a simple calculation similar to the service.
+
+    double multiplier = 1.0;
+
+    int targetMonths = 1;
+    switch (_selectedPeriod) {
+      case 'Monthly':
+        targetMonths = 1;
+        break;
+      case 'Quarterly':
+        targetMonths = 3;
+        break;
+      case 'Semi-Annually':
+        targetMonths = 6;
+        break;
+      case 'Annually':
+        targetMonths = 12;
+        break;
+      default:
+        targetMonths = 1;
+    }
+
+    int sourceMonths = 1;
+    switch (widget.preset.period) {
+      case 'Monthly':
+        sourceMonths = 1;
+        break;
+      case 'Quarterly':
+        sourceMonths = 3;
+        break;
+      case 'Semi-Annually':
+        sourceMonths = 6;
+        break;
+      case 'Annually':
+        sourceMonths = 12;
+        break;
+      default:
+        sourceMonths = 1;
+    }
+
+    multiplier = targetMonths / sourceMonths;
+    _calculatedTotal = widget.preset.calculatedTotal * multiplier;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,12 +125,12 @@ class PresetCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      preset.name,
+                      widget.preset.name,
                       style: AppTheme.h3,
                     ),
                     const SizedBox(height: AppTheme.spacingXs),
                     Text(
-                      preset.description,
+                      widget.preset.description,
                       style: AppTheme.bodyMedium.copyWith(
                         color: context.colors.textSecondary,
                       ),
@@ -61,7 +139,8 @@ class PresetCard extends StatelessWidget {
                 ),
               ),
               ElevatedButton(
-                onPressed: onAdopt,
+                onPressed: () => widget.onAdopt(
+                    widget.preset, _selectedPeriod, _customMonths),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppTheme.spacingLg,
@@ -87,31 +166,78 @@ class PresetCard extends StatelessWidget {
           Wrap(
             spacing: AppTheme.spacingSm,
             runSpacing: AppTheme.spacingSm,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               _buildInfoChip(
                 context,
                 icon: Icons.people_outline,
-                label: preset.targetAudience,
+                label: widget.preset.targetAudience,
               ),
               _buildInfoChip(
                 context,
                 icon: Icons.category_outlined,
-                label: '${preset.totalCategories} categories',
+                label: '${widget.preset.totalCategories} categories',
               ),
               _buildInfoChip(
                 context,
                 icon: Icons.account_balance_wallet_outlined,
-                label: '${preset.totalAccounts} accounts',
+                label: '${widget.preset.totalAccounts} accounts',
               ),
-              _buildInfoChip(
-                context,
-                icon: Icons.calendar_today_outlined,
-                label: preset.period,
+              // Period Selector Dropdown
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppTheme.spacingSm,
+                ),
+                decoration: BoxDecoration(
+                  color: context.colors.surface,
+                  borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                  border: Border.all(
+                    color: context.colors.border,
+                    width: 1,
+                  ),
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: _selectedPeriod,
+                    isDense: true,
+                    icon: Icon(Icons.arrow_drop_down,
+                        size: 20, color: context.colors.textSecondary),
+                    style: AppTheme.bodySmall.copyWith(
+                      color: context.colors.textSecondary,
+                    ),
+                    onChanged: (String? newValue) {
+                      if (newValue != null) {
+                        setState(() {
+                          _selectedPeriod = newValue;
+                          _recalculateTotal();
+                        });
+                      }
+                    },
+                    items: _periodOptions
+                        .map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.calendar_today_outlined,
+                              size: 14,
+                              color: context.colors.textSecondary,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(value),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
               ),
               _buildInfoChip(
                 context,
                 icon: Icons.attach_money,
-                label: currencyFormatter.format(preset.calculatedTotal),
+                label: currencyFormatter.format(_calculatedTotal),
                 isHighlight: true,
               ),
             ],
@@ -131,7 +257,7 @@ class PresetCard extends StatelessWidget {
           Wrap(
             spacing: AppTheme.spacingXs,
             runSpacing: AppTheme.spacingXs,
-            children: preset.categories.take(8).map<Widget>((category) {
+            children: widget.preset.categories.take(8).map<Widget>((category) {
               return Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppTheme.spacingSm,
@@ -150,14 +276,14 @@ class PresetCard extends StatelessWidget {
               );
             }).toList()
               ..add(
-                preset.categories.length > 8
+                widget.preset.categories.length > 8
                     ? Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: AppTheme.spacingSm,
                           vertical: AppTheme.spacingXs,
                         ),
                         child: Text(
-                          '+${preset.categories.length - 8} more',
+                          '+${widget.preset.categories.length - 8} more',
                           style: AppTheme.bodySmall.copyWith(
                             color: context.colors.textTertiary,
                             fontStyle: FontStyle.italic,
@@ -183,6 +309,7 @@ class PresetCard extends StatelessWidget {
         horizontal: AppTheme.spacingSm,
         vertical: AppTheme.spacingXs,
       ),
+      height: 36, // Fixed height to match dropdown
       decoration: BoxDecoration(
         color: isHighlight
             ? context.colors.secondary.withOpacity(0.1)

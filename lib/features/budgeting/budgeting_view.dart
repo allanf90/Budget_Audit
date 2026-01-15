@@ -483,15 +483,22 @@ class _BudgetingViewState extends State<BudgetingView> {
                         ),
                       )
                     : ListView.builder(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppTheme.spacingMd,
+                          vertical: AppTheme.spacingMd,
+                        ),
                         itemCount: viewModel.availablePresets.length,
                         itemBuilder: (context, index) {
                           final preset = viewModel.availablePresets[index];
                           return PresetCard(
                             preset: preset,
-                            onAdopt: () => _handleAdoptPreset(
+                            onAdopt: (preset, period, months) =>
+                                _handleAdoptPreset(
                               modalContext,
                               viewModel,
                               preset,
+                              period: period,
+                              customMonths: months,
                             ),
                           );
                         },
@@ -507,8 +514,10 @@ class _BudgetingViewState extends State<BudgetingView> {
   void _handleAdoptPreset(
     BuildContext modalContext,
     BudgetingViewModel viewModel,
-    preset,
-  ) {
+    preset, {
+    String? period,
+    int? customMonths,
+  }) {
     if (viewModel.hasUnsavedChanges) {
       showDialog(
         context: modalContext,
@@ -570,7 +579,8 @@ class _BudgetingViewState extends State<BudgetingView> {
                       final successColor = this.context.colors.success;
                       final nav = Navigator.of(modalContext);
 
-                      viewModel.adoptPreset(preset);
+                      viewModel.adoptPreset(preset,
+                          period: period, customMonths: customMonths);
 
                       if (nav.canPop()) nav.pop();
                       messenger.showSnackBar(
@@ -591,7 +601,8 @@ class _BudgetingViewState extends State<BudgetingView> {
                   final successColor = this.context.colors.success;
                   final nav = Navigator.of(modalContext);
 
-                  viewModel.adoptPreset(preset);
+                  viewModel.adoptPreset(preset,
+                      period: period, customMonths: customMonths);
 
                   if (nav.canPop()) nav.pop();
                   messenger.showSnackBar(
@@ -611,20 +622,28 @@ class _BudgetingViewState extends State<BudgetingView> {
         },
       );
     } else {
-      _adoptPresetDirectly(modalContext, viewModel, preset);
+      _adoptPresetDirectly(
+        modalContext,
+        viewModel,
+        preset,
+        period: period,
+        customMonths: customMonths,
+      );
     }
   }
 
   void _adoptPresetDirectly(
     BuildContext modalContext,
     BudgetingViewModel viewModel,
-    preset,
-  ) {
+    preset, {
+    String? period,
+    int? customMonths,
+  }) {
     final messenger = ScaffoldMessenger.of(this.context);
     final successColor = this.context.colors.success;
     final nav = Navigator.of(modalContext);
 
-    viewModel.adoptPreset(preset);
+    viewModel.adoptPreset(preset, period: period, customMonths: customMonths);
 
     if (nav.canPop()) nav.pop();
     messenger.showSnackBar(
