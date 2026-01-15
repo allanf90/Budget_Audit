@@ -470,7 +470,7 @@ class _BudgetingViewState extends State<BudgetingView> {
         builder: (modalContext) {
           // Use the outer context's viewModel, but modal's context for AppContext
           return Consumer<AppContext>(
-            builder: (_, appContext, __) {
+            builder: (context, appContext, __) {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -516,6 +516,8 @@ class _BudgetingViewState extends State<BudgetingView> {
                         : ListView.builder(
                             itemCount: viewModel.templates.length,
                             itemBuilder: (context, index) {
+                              // Shadow context again if needed, but ListView builder provides one too.
+                              // Actually ListView builder context is also named 'context' here naturally.
                               final template = viewModel.templates[index];
                               final isCurrent =
                                   appContext.currentTemplate?.templateId ==
